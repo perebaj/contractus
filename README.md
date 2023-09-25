@@ -5,9 +5,22 @@
 
 ![image](assets/contractus.png)
 
+
 # Contractus
 
 Jamming around orders with API endpoints 🎸
+
+## Command line
+All commands should be runned within a container environment:
+    
+    make dev/start
+    make dev
+
+Then you can run:
+    
+    The integration tests: make integration-test
+    The Unit tests: make test
+    The lint: make lint
 
 ## Ship a new version
     `make image/publish`
@@ -18,4 +31,6 @@ Jamming around orders with API endpoints 🎸
     `heroku logs --tail -a contractus`
 
 ## API documentation
+
+
 

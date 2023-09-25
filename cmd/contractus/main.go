@@ -1,7 +1,4 @@
-// contractus runs the service.
-// For details on how to configure it just run:
-//
-//	contractus --help
+// Package main grather all the pieces and start the service.
 package main
 
 import (
@@ -13,6 +10,7 @@ import (
 	"log/slog"
 )
 
+// Config have the core configuration for the service.
 type Config struct {
 	PORT string
 }
@@ -25,7 +23,10 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/jojo", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Jojo is aweasome!"))
+		_, err := w.Write([]byte("Jojo is aweasome!"))
+		if err != nil {
+			slog.Error("Failed to write response", "error", err)
+		}
 	})
 
 	svc := &http.Server{

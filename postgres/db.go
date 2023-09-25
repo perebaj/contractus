@@ -1,3 +1,4 @@
+// Package postgres grather all the pieces that are related to postgres database.
 package postgres
 
 import (
@@ -13,6 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// Config have the core configuration for postgres database.
 type Config struct {
 	URL             string
 	MaxOpenConns    int
@@ -20,7 +22,7 @@ type Config struct {
 	ConnMaxIdleTime time.Duration
 }
 
-// Create a database connection
+// OpenDB create a database connection
 func OpenDB(cfg Config) (*sqlx.DB, error) {
 	db, err := sql.Open("postgres", cfg.URL)
 	if err != nil {
@@ -43,6 +45,7 @@ func OpenDB(cfg Config) (*sqlx.DB, error) {
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
+// Migrate run the migrations for the database.
 func Migrate(db *sql.DB) error {
 	fs, err := iofs.New(migrationsFS, "migrations")
 	if err != nil {
