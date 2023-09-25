@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  api:
+    image: search:dev
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+      args:
+        GO_VERSION: ${GO_VERSION}
+    environment:
+      CONTRACTUS_POSTGRES_URL: postgres://postgres:postgres@postgres:5432/search?sslmode=disable
+    volumes:
+      - .:/app/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: go run ./cmd/contractus
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: search
+    volumes:
+      - db:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 2s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  db:
