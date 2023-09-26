@@ -3,6 +3,7 @@ module github.com/birdie-ai/contractus
 go 1.21
 
 require (
+	github.com/go-chi/chi/v5 v5.0.10
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/golangci/golangci-lint v1.54.2
 	github.com/jmoiron/sqlx v1.3.5

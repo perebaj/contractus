@@ -1,56 +1,46 @@
-SHELL = /bin/bash
+export GO_VERSION=1.21.1
+export GOLANGCI_LINT_VERSION=v1.54.0
 
-# TOOLS VERSIONS
-GO_VERSION=1.21.0
-GOLANGCI_LINT_VERSION=v1.54.0
-
-# configuration/aliases
-version=$(shell git rev-parse --short HEAD)
 base_image=registry.heroku.com/contractus/web
-image=$(base_image):latest
-devimage=contractus-dev
-# To avoid downloading deps everytime it runs on containers
-gopkg=$(devimage)-gopkg
-gocache=$(devimage)-gocache
-devrun=docker run $(devrunopts) --rm \
-	-v `pwd`:/app \
-	-v $(gopkg):/go/pkg \
-	-v $(gocache):/root/.cache/go-build \
-	$(devimage)
+version:=$(shell git rev-parse --short HEAD)
+image:=$(base_image):latest
+devrunopts:=--no-deps
+container=contractus
+devrun:=docker-compose run --rm $(devrunopts) $(container)
 
-covreport ?= coverage.txt
-
-all: lint test image
-
-## run isolated tests
-.PHONY: test
-test:
-	go test ./... -timeout 10s -race -shuffle on
-
-## Format go code
-.PHONY: fmt
-fmt:
-	goimports -w .
-
-## builds the service
-.PHONY: service
-service:
+## Build the service
+.PHONY: build
+build:
 	go build -o ./cmd/contractus/contractus ./cmd/contractus
 
-## runs the service locally
-.PHONY: run
-run: service
-	./cmd/contractus/contractus
+## Build service image
+.PHONY: image
+image:
+	docker build . \
+	--build-arg GO_VERSION=$(GO_VERSION) \
+	-t $(image)
 
-## tidy up go modules
-.PHONY: mod
-mod:
-	go mod tidy
+## Publish the service image
+.PHONY: image/publish
+image/publish: image
+	docker push $(image)
 
-## lint the whole project
+## Run tests, if testcase=<testcase> only run that testcase
+.PHONY: test
+test:
+	@echo "Running tests..."
+	go test -run="$(testcase)" -cover ./...
+
+## Run integration tests
+.PHONY: integration-test
+integration-test:
+	go test -tags integration -run="$(testcase)" ./...
+
+## Run lint
 .PHONY: lint
 lint:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run ./...
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run ./... -v
+	go run golang.org/x/vuln/cmd/govulncheck ./...
 
 ## Create a new migration, use make migration/new name=<migration_name>
 .PHONY: migration/new
@@ -93,69 +83,54 @@ migration/drop: param-CONTRACTUS_POSTGRES_URL
 		-verbose \
 		drop
 
+## Clean containers, images and volumes
+.PHONY: dev/clean
+dev/clean:
+	@echo "Cleaning containers, images and volumes..."
+	@docker-compose down --rmi all --volumes --remove-orphans
 
-## generates coverage report
-.PHONY: test/coverage
-test/coverage:
-	go test -count=1 -coverprofile=$(covreport) ./...
-
-## generates coverage report and shows it on the browser locally
-.PHONY: test/coverage/show
-test/coverage/show: test/coverage
-	go tool cover -html=$(covreport)
-
-## Build the service image
-.PHONY: image
-image:
-	docker build . \
-		--build-arg GO_VERSION=$(GO_VERSION) \
-		-t $(image)
-
-## Build a production ready container image and run it locally for testing.
-.PHONY: image/run
-image/run: image
-	docker run --rm -ti \
-		-v $(gopkg):/go/pkg \
-		$(image)
-
-## Publish the service image
-.PHONY: image/publish
-image/publish: image
-	docker push $(image)
-
-## Releases to production
-.PHONY: release
-release: release_version=release-$(shell date '+%Y-%m-%d')-$(version)
-release: release_image=$(base_image):$(release_version)
-release:
-	@echo "releasing from image: $(image)"
-	@echo "release image:        $(release_image)"
-	@echo "git tag:              $(release_version)"
-	docker pull $(image)
-	docker image tag $(image) $(release_image)
-	docker push $(release_image)
-	git tag -a $(release_version) -m "release to production: $(release_image)"
-	git push origin $(release_version)
-
-## Create the dev container image
+## Build dev image service
 .PHONY: dev/image
 dev/image:
-	docker build \
-		--build-arg GO_VERSION=$(GO_VERSION) \
-		--build-arg GOLANGCI_LINT_VERSION=$(GOLANGCI_LINT_VERSION) \
-		-t $(devimage) \
-		-f Dockerfile.dev \
-		.
+	docker-compose build
 
-## Create a shell inside the dev container
+## Start containers, additionaly you can provide rebuild=true to force rebuild
+.PHONY: dev/start
+dev/start:
+	@echo "Starting development server..."
+	@if [ "$(rebuild)" = "true" ]; then \
+		docker-compose up -d --build; \
+	else \
+		docker-compose up -d; \
+	fi
+
+## Stop containers
+.PHONY: dev/stop
+dev/stop:
+	@echo "Stopping development server..."
+	@docker-compose down
+
+## Restart containers, if container=<name> is provided only it will be restarted
+.PHONY: dev/restart
+dev/restart: container=
+dev/restart:
+	@echo "Restarting development server..."
+	@docker-compose restart $(container)
+
+## Show logs, if container=<name> is provided logs for only that container will be shown
+.PHONY: dev/logs
+dev/logs:
+	@echo "Showing logs..."
+	@docker-compose logs -f $(container)
+
+## Access the container
 .PHONY: dev
-dev: devrunopts=-ti
-dev: dev/image
-	$(devrun)
+dev:
+	@$(devrun) bash
 
 ## run a make target inside the dev container.
-dev/%: dev/image
-	$(devrun) make ${*}
+dev/%:
+	@$(devrun) make ${*}
 
 ## Display help for all targets
 .PHONY: help
