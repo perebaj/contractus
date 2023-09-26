@@ -121,6 +121,10 @@ dev/logs:
 dev:
 	@$(devrun) bash
 
+## run a make target inside the dev container.
+dev/%:
+	@$(devrun) make ${*}
+
 ## Display help for all targets
 .PHONY: help
 help:
