@@ -24,7 +24,7 @@ All commands are synthesized in the Makefile, to start the development environme
     make dev/start
     make dev <- You will be able to run commands inside the container
 
-After run `make dev`, it's possible to run the following commands inside the container:
+After running `make dev`, it's possible to run the following commands inside the container:
     
 - The integration tests: `make integration-test testcase=<>`
 - The Unit tests: `make test testcase=<>`
@@ -47,4 +47,6 @@ The testcase variable could be used to run a specific test
 ## API documentation
 
 
-
+## Attention points 
+ - For a while, the integration-tests just ran locally not in CI, this increased the time to ship code 🚀
+ 

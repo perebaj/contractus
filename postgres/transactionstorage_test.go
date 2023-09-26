@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/birdie-ai/contractus"
 	"github.com/birdie-ai/contractus/postgres"
 	"github.com/jmoiron/sqlx"
 )
@@ -82,5 +83,44 @@ func TestJojo(t *testing.T) {
 
 	if true != true {
 		t.Fatalf("assertion error")
+	}
+}
+
+func TestTransactionStorageSave(t *testing.T) {
+	db := OpenDB(t)
+	storage := postgres.NewTransactionStorage(db)
+	want := contractus.Transaction{
+		Type:               1,
+		Date:               time.Now().UTC(),
+		ProductDescription: "Product description",
+		ProductPriceCents:  "1000",
+		SellerName:         "John Doe",
+		SellerType:         "affiliate",
+	}
+
+	err := storage.Save(&want)
+	if err != nil {
+		t.Fatalf("error saving transaction: %v", err)
+	}
+
+	var got contractus.Transaction
+	err = db.Get(&got, "SELECT * FROM transactions LIMIT 1")
+	if err != nil {
+		t.Fatalf("error getting transaction: %v", err)
+	}
+
+	assert(t, got.Type, want.Type)
+	assert(t, got.Date.Format(time.RFC3339), want.Date.Format(time.RFC3339))
+	assert(t, got.ProductDescription, want.ProductDescription)
+	assert(t, got.ProductPriceCents, want.ProductPriceCents)
+	assert(t, got.SellerName, want.SellerName)
+	assert(t, got.SellerType, want.SellerType)
+}
+
+func assert(t *testing.T, got, want interface{}) {
+	t.Helper()
+
+	if got != want {
+		t.Fatalf("got %v want %v", got, want)
 	}
 }
