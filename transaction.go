@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+// TransactionResponse have the fields that represent the API response.
+type TransactionResponse struct {
+	Transactions []Transaction `json:"transactions"`
+	Total        int           `json:"total"`
+}
+
 // Transaction have the fields that represent a single transaction.
 type Transaction struct {
 	Type               int       `json:"type" db:"type"`

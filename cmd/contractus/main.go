@@ -38,7 +38,7 @@ func main() {
 		slog.Error("Failed to connect to database", "error", err)
 		syscall.Exit(1)
 	}
-	storage := postgres.NewTransactionStorage(db)
+	storage := postgres.NewStorage(db)
 
 	r := chi.NewRouter()
 	r.Group(func(r chi.Router) {

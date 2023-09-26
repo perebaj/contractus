@@ -49,4 +49,4 @@ The testcase variable could be used to run a specific test
 
 ## Attention points 
  - For a while, the integration-tests just ran locally not in CI, this increased the time to ship code 🚀
- 
+ - We already don't have a way to paginate transactions. 😔
