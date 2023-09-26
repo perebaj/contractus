@@ -78,7 +78,6 @@ func getEnvWithDefault(key, defaultValue string) string {
 
 // setUpLog initialize the logger.
 func setUpLog(cfg Config) error {
-
 	var level slog.Level
 	switch cfg.LogLevel {
 	case "INFO":
