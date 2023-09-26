@@ -10,6 +10,12 @@
 
 Jamming around orders with API endpoints 🎸
 
+## Environment Variables
+
+To start the service you need to export the current environment variables:
+
+    export CONTRACTUS_POSTGRES_URL=<>
+
 ## Command line
 All commands should be runned within a container environment:
     

@@ -2,45 +2,54 @@
 package main
 
 import (
-	"net/http"
+	"fmt"
 	"os"
-	"syscall"
-	"time"
 
-	"log/slog"
+	"github.com/birdie-ai/contractus/postgres"
 )
 
 // Config have the core configuration for the service.
 type Config struct {
-	PORT string
+	PORT     string
+	Postgres postgres.Config
 }
 
 func main() {
-	cfg := Config{
-		PORT: getEnvWithDefault("PORT", "8080"),
-	}
+	fmt.Println("Hello, playground")
+	// cfg := Config{
+	// 	PORT: getEnvWithDefault("PORT", "8080"),
+	// 	Postgres: postgres.Config{
+	// 		URL:             os.Getenv("CONTRACTUS_POSTGRES_URL"),
+	// 		MaxOpenConns:    10,
+	// 		MaxIdleConns:    5,
+	// 		ConnMaxIdleTime: 1 * time.Minute,
+	// 	},
+	// }
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte("Jojo is aweasome!"))
-		if err != nil {
-			slog.Error("Failed to write response", "error", err)
-		}
-	})
+	// db, err := postgres.OpenDB(cfg.Postgres)
+	// if err != nil {
+	// 	slog.Error("Failed to connect to database", "error", err)
+	// 	syscall.Exit(1)
+	// }
+	// storage := postgres.NewTransactionStorage(db)
 
-	svc := &http.Server{
-		Addr:         ":" + cfg.PORT,
-		Handler:      mux,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second,
-	}
-	slog.Info("Starting server", "addr", cfg.PORT)
-	err := svc.ListenAndServe()
-	if err != nil {
-		slog.Error("Failed to start server", "error", err)
-		syscall.Exit(1)
-	}
+	// r := chi.NewRouter()
+	// r.Group(func(r chi.Router) {
+	// 	api.RegisterHandler(r, storage)
+	// })
+
+	// svc := &http.Server{
+	// 	Addr:         ":" + cfg.PORT,
+	// 	Handler:      r,
+	// 	ReadTimeout:  5 * time.Second,
+	// 	WriteTimeout: 5 * time.Second,
+	// }
+	// slog.Info("Starting server", "addr", cfg.PORT)
+	// err = svc.ListenAndServe()
+	// if err != nil {
+	// 	slog.Error("Failed to start server", "error", err)
+	// 	syscall.Exit(1)
+	// }
 }
 
 func getEnvWithDefault(key, defaultValue string) string {

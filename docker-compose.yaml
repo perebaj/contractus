@@ -1,15 +1,15 @@
 version: "3.9"
 
 services:
-  api:
-    image: search:dev
+  contractus:
+    image: contractus:dev
     build:
       context: .
       dockerfile: ./Dockerfile.dev
       args:
         GO_VERSION: ${GO_VERSION}
     environment:
-      CONTRACTUS_POSTGRES_URL: postgres://postgres:postgres@postgres:5432/search?sslmode=disable
+      CONTRACTUS_POSTGRES_URL: postgres://postgres:postgres@postgres:5432/contractus?sslmode=disable
     volumes:
       - .:/app/src
     depends_on:
@@ -21,7 +21,7 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
-      POSTGRES_DB: search
+      POSTGRES_DB: contractus
     volumes:
       - db:/var/lib/postgresql/data
     restart: unless-stopped
@@ -30,6 +30,5 @@ services:
       interval: 2s
       timeout: 3s
       retries: 5
-
 volumes:
   db:

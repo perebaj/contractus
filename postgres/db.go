@@ -28,6 +28,12 @@ func OpenDB(cfg Config) (*sqlx.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("connecting to postgres: %v", err)
 	}
+
+	err = Migrate(db)
+	if err != nil {
+		return nil, fmt.Errorf("migrating postgres: %v", err)
+	}
+
 	db.SetMaxOpenConns(cfg.MaxOpenConns)
 	db.SetMaxIdleConns(cfg.MaxIdleConns)
 	db.SetConnMaxIdleTime(cfg.ConnMaxIdleTime)
