@@ -77,16 +77,17 @@ func OpenDB(t *testing.T) *sqlx.DB {
 func TestStorageSaveTransaction(t *testing.T) {
 	db := OpenDB(t)
 	storage := postgres.NewStorage(db)
+	ctx := context.Background()
 	want := contractus.Transaction{
 		Type:               1,
 		Date:               time.Now().UTC(),
 		ProductDescription: "Product description",
-		ProductPriceCents:  "1000",
+		ProductPriceCents:  1000,
 		SellerName:         "John Doe",
 		SellerType:         "producer",
 	}
 
-	err := storage.SaveTransaction(&want)
+	err := storage.SaveTransaction(ctx, &want)
 	if err != nil {
 		t.Fatalf("error saving transaction: %v", err)
 	}
@@ -108,12 +109,12 @@ func TestStorageSaveTransaction(t *testing.T) {
 func TestStorageTransactions(t *testing.T) {
 	db := OpenDB(t)
 	storage := postgres.NewStorage(db)
-
+	ctx := context.Background()
 	want := contractus.Transaction{
 		Type:               1,
 		Date:               time.Now().UTC(),
 		ProductDescription: "Product description",
-		ProductPriceCents:  "1000",
+		ProductPriceCents:  1000,
 		SellerName:         "John Doe",
 		SellerType:         "producer",
 	}
@@ -122,22 +123,22 @@ func TestStorageTransactions(t *testing.T) {
 		Type:               2,
 		Date:               time.Now().UTC(),
 		ProductDescription: "Product description 2",
-		ProductPriceCents:  "2000",
+		ProductPriceCents:  2000,
 		SellerName:         "John Doe 2",
 		SellerType:         "affiliate",
 	}
 
-	err := storage.SaveTransaction(&want)
+	err := storage.SaveTransaction(ctx, &want)
 	if err != nil {
 		t.Fatalf("error saving transaction 1: %v", err)
 	}
 
-	err = storage.SaveTransaction(&want2)
+	err = storage.SaveTransaction(ctx, &want2)
 	if err != nil {
 		t.Fatalf("error saving transaction 2: %v", err)
 	}
 
-	got, err := storage.Transactions()
+	got, err := storage.Transactions(ctx)
 	if err != nil {
 		t.Fatalf("error getting transactions: %v", err)
 	}
@@ -163,6 +164,98 @@ func TestStorageTransactions(t *testing.T) {
 	} else {
 		t.Fatal("error getting transactions: expected 2 transactions")
 	}
+}
+
+func TestStorageBalance(t *testing.T) {
+	db := OpenDB(t)
+	storage := postgres.NewStorage(db)
+	ctx := context.Background()
+
+	transac1 := contractus.Transaction{
+		Type:               1,
+		Date:               time.Now().UTC(),
+		ProductDescription: "Product description",
+		ProductPriceCents:  12750,
+		SellerName:         "JOSE CARLOS",
+		SellerType:         "producer",
+	}
+
+	transac2 := contractus.Transaction{
+		Type:               3,
+		Date:               time.Now().UTC(),
+		ProductDescription: "Product description 2",
+		ProductPriceCents:  4500,
+		SellerName:         "JOSE CARLOS",
+		SellerType:         "producer",
+	}
+
+	transac3 := contractus.Transaction{
+		Type:               1,
+		Date:               time.Now().UTC(),
+		ProductDescription: "Product description 3",
+		ProductPriceCents:  12750,
+		SellerName:         "JOSE CARLOS",
+		SellerType:         "producer",
+	}
+
+	err := storage.SaveTransaction(ctx, &transac1)
+	if err != nil {
+		t.Fatalf("error saving transaction 1: %v", err)
+	}
+
+	err = storage.SaveTransaction(ctx, &transac2)
+	if err != nil {
+		t.Fatalf("error saving transaction 2: %v", err)
+	}
+
+	err = storage.SaveTransaction(ctx, &transac3)
+	if err != nil {
+		t.Fatalf("error saving transaction 3: %v", err)
+	}
+
+	got, err := storage.Balance(ctx, "producer", "JOSE CARLOS")
+	if err != nil {
+		t.Fatalf("error getting balance: %v", err)
+	}
+
+	assert(t, got.Balance, int64(21000))
+	assert(t, got.SellerName, "JOSE CARLOS")
+
+	transac1 = contractus.Transaction{
+		Type:               2,
+		Date:               time.Now().UTC(),
+		ProductDescription: "Product description",
+		ProductPriceCents:  155000,
+		SellerName:         "CARLOS BATISTA",
+		SellerType:         "affiliate",
+	}
+
+	transac2 = contractus.Transaction{
+		Type:               4,
+		Date:               time.Now().UTC(),
+		ProductDescription: "Product description 2",
+		ProductPriceCents:  50000,
+		SellerName:         "CARLOS BATISTA",
+		SellerType:         "affiliate",
+	}
+
+	err = storage.SaveTransaction(ctx, &transac1)
+	if err != nil {
+		t.Fatalf("error saving transaction 1: %v", err)
+	}
+
+	err = storage.SaveTransaction(ctx, &transac2)
+	if err != nil {
+		t.Fatalf("error saving transaction 2: %v", err)
+	}
+
+	got, err = storage.Balance(ctx, "affiliate", "CARLOS BATISTA")
+	if err != nil {
+		t.Fatalf("error getting balance: %v", err)
+	}
+
+	assert(t, got.Balance, int64(205000))
+	assert(t, got.SellerName, "CARLOS BATISTA")
 }
 
 func assert(t *testing.T, got, want interface{}) {
