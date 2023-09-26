@@ -11,7 +11,7 @@ devrun:=docker-compose run --rm $(devrunopts) $(container)
 ## Build the service
 .PHONY: build
 build:
-	go build ./cmd/contractus
+	go build -o ./cmd/contractus/contractus ./cmd/contractus
 
 ## Build service image
 .PHONY: image
