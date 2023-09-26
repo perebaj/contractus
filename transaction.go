@@ -6,10 +6,16 @@ import (
 	"time"
 )
 
-// TransactionResponse have the fields that represent the API response.
+// TransactionResponse have the fields that represent the transactions API response.
 type TransactionResponse struct {
 	Transactions []Transaction `json:"transactions"`
 	Total        int           `json:"total"`
+}
+
+// BalanceResponse have the fields that represent the seller balance API response.
+type BalanceResponse struct {
+	Balance    int64  `json:"balance"`
+	SellerName string `json:"seller_name"`
 }
 
 // Transaction have the fields that represent a single transaction.
@@ -17,7 +23,7 @@ type Transaction struct {
 	Type               int       `json:"type" db:"type"`
 	Date               time.Time `json:"date" db:"date"`
 	ProductDescription string    `json:"product_description" db:"product_description"`
-	ProductPriceCents  string    `json:"product_price_cents" db:"product_price_cents"`
+	ProductPriceCents  int64     `json:"product_price_cents" db:"product_price_cents"`
 	SellerName         string    `json:"seller_name" db:"seller_name"`
 	SellerType         string    `json:"seller_type" db:"seller_type"`
 }

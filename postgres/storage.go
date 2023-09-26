@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"context"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/perebaj/contractus"
 )
@@ -18,8 +20,8 @@ func NewStorage(db *sqlx.DB) *Storage {
 }
 
 // SaveTransaction is responsible for saving a transaction into the database.
-func (s Storage) SaveTransaction(t *contractus.Transaction) error {
-	_, err := s.db.Exec(`
+func (s Storage) SaveTransaction(ctx context.Context, t *contractus.Transaction) error {
+	_, err := s.db.ExecContext(ctx, `
 		INSERT INTO transactions (type, date, product_description, product_price_cents, seller_name, seller_type)
 		VALUES ($1, $2, $3, $4, $5, $6)
 	`, t.Type, t.Date, t.ProductDescription, t.ProductPriceCents, t.SellerName, t.SellerType)
@@ -29,10 +31,10 @@ func (s Storage) SaveTransaction(t *contractus.Transaction) error {
 
 // Transactions is responsible for returning all the transactions from the database.
 // TODO(JOJO): Have a way to paginate the transactions.
-func (s Storage) Transactions() (contractus.TransactionResponse, error) {
+func (s Storage) Transactions(ctx context.Context) (contractus.TransactionResponse, error) {
 	var transactions []contractus.Transaction
 
-	err := s.db.Select(&transactions, `
+	err := s.db.SelectContext(ctx, &transactions, `
 		SELECT type, date, product_description, product_price_cents, seller_name, seller_type
 		FROM transactions
 	`)
@@ -46,6 +48,31 @@ func (s Storage) Transactions() (contractus.TransactionResponse, error) {
 	}, nil
 }
 
-// func (s Storage) Balance(ctx context.Context) error {
-// 	return nil
-// }
+// Balance is responsible for return the balance of a seller.
+func (s Storage) Balance(ctx context.Context, sellerType, sellerName string) (*contractus.BalanceResponse, error) {
+	var transactions []contractus.Transaction
+
+	err := s.db.SelectContext(ctx, &transactions, `
+		SELECT type, date, product_description, product_price_cents, seller_name, seller_type
+		FROM transactions
+		WHERE seller_type = $1 AND seller_name = $2
+	`, sellerType, sellerName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var balance int64
+	for _, t := range transactions {
+		if t.Type != 3 {
+			balance += t.ProductPriceCents
+		} else {
+			balance -= t.ProductPriceCents
+		}
+	}
+
+	return &contractus.BalanceResponse{
+		Balance:    balance,
+		SellerName: sellerName,
+	}, nil
+}
