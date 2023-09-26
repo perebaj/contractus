@@ -79,4 +79,8 @@ func TestJojo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error getting data: %v", err)
 	}
+
+	if true != true {
+		t.Fatalf("error getting data: %v", err)
+	}
 }
