@@ -117,13 +117,9 @@ dev/logs:
 	@docker-compose logs -f $(container)
 
 ## Access the container
+.PHONY: dev
 dev:
 	@$(devrun) bash
-
-## Run the make target inside the container.
-dev/integration-test: devrunopts=
-dev/%:
-	@$(devrun) make ${*}
 
 ## Display help for all targets
 .PHONY: help
@@ -133,7 +129,7 @@ help:
 			if (msg) { \
 				cmd = substr($$0, 9, 100); \
 				msg = substr(lastLine, 4, 1000); \
-				printf "  ${GREEN}%-18s${RESET} %s\n", cmd, msg; \
+				printf "  ${GREEN}%-30s${RESET} %s\n", cmd, msg; \
 			} \
 	} \
 	{ lastLine = $$0 }' $(MAKEFILE_LIST)
