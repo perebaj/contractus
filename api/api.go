@@ -1,7 +1,7 @@
+// Package api gather generic functions to deal with the API.
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,6 +9,7 @@ import (
 	"log/slog"
 )
 
+// Error represents an error returned by the API.
 type Error struct {
 	Code string `json:"code"`
 	Msg  string `json:"msg"`
@@ -17,11 +18,16 @@ type Error struct {
 func (e Error) Error() string {
 	return fmt.Sprintf("%s: %s", e.Code, e.Msg)
 }
-func sendErr(ctx context.Context, w http.ResponseWriter, statusCode int, err error) {
-	send(ctx, w, statusCode, Error{Code: "internal_error", Msg: "Internal server error"})
+func sendErr(w http.ResponseWriter, statusCode int, err error) {
+	if statusCode >= 500 {
+		slog.Error("Internal server error", "error", err)
+	}
+	err = Error{Code: "internal_server_error error", Msg: "Internal server error"}
+
+	send(w, statusCode, err)
 }
 
-func send(ctx context.Context, w http.ResponseWriter, statusCode int, body interface{}) {
+func send(w http.ResponseWriter, statusCode int, body interface{}) {
 	const jsonContentType = "application/json; charset=utf-8"
 
 	w.Header().Set("Content-Type", jsonContentType)

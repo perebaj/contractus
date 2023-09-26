@@ -1,4 +1,5 @@
-package main
+// Package contractus implements the transaction struct and its methods.
+package contractus
 
 import "fmt"
 
@@ -15,7 +16,7 @@ type Transaction struct {
 func (t Transaction) typ() (string, error) {
 	switch t.Type {
 	case 1:
-		return "venda Produtor", nil
+		return "venda produtor", nil
 	case 2:
 		return "venda afiliado", nil
 	case 3:
