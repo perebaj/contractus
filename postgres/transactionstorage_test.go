@@ -81,6 +81,6 @@ func TestJojo(t *testing.T) {
 	}
 
 	if true != true {
-		t.Fatalf("error getting data: %v", err)
+		t.Fatalf("assertion error")
 	}
 }

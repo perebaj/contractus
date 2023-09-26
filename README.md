@@ -12,28 +12,36 @@ Jamming around orders with API endpoints 🎸
 
 ## Environment Variables
 
-To start the service you need to export the current environment variables:
+To start the service locally, you need to export the current environment variables:
 
     export CONTRACTUS_POSTGRES_URL=<>
 
-## Command line
-All commands should be runned within a container environment:
-    
-    make dev/start
-    make dev
+But, to play around the code and tests, it's possible with the command line ⤵️⤵️⤵️
 
-Then you can run:
+## Command line
+All commands are synthesized in the Makefile, to start the development environment, just run:
+
+    make dev/start
+    make dev <- You will be able to run commands inside the container
+
+After run `make dev`, it's possible to run the following commands inside the container:
     
-    The integration tests: make integration-test
-    The Unit tests: make test
-    The lint: make lint
+- The integration tests: `make integration-test testcase=<>`
+- The Unit tests: `make test testcase=<>`
+- The lint: `make lint`
+
+Or, it's also possible run from local:
+
+- make `dev/integration-test testcase=<>`
+- make `dev/test testcase=<>`
+
+The testcase variable could be used to run a specific test
 
 ## Ship a new version
     `make image/publish`
     `heroky container:release web -a contractus`
 
 ## Logs in production
-
     `heroku logs --tail -a contractus`
 
 ## API documentation
