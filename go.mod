@@ -1,4 +1,4 @@
-module github.com/birdie-ai/contractus
+module github.com/perebaj/contractus
 
 go 1.21
 
