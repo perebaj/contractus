@@ -27,8 +27,8 @@ func (s Storage) SaveTransaction(t *contractus.Transaction) error {
 	return err
 }
 
-// TODO(JOJO): Have a way to paginate the transactions.
 // Transactions is responsible for returning all the transactions from the database.
+// TODO(JOJO): Have a way to paginate the transactions.
 func (s Storage) Transactions() (contractus.TransactionResponse, error) {
 	var transactions []contractus.Transaction
 
