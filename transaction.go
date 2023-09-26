@@ -1,16 +1,19 @@
 // Package contractus implements the transaction struct and its methods.
 package contractus
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // Transaction have the fields that represent a single transaction.
 type Transaction struct {
-	Type               int    `json:"type"`
-	Date               string `json:"date"`
-	ProductDescription string `json:"product_description"`
-	ProductPrice       string `json:"product_price"`
-	SellerName         string `json:"seller_name"`
-	SellerType         string `json:"seller_type"`
+	Type               int       `json:"type" db:"type"`
+	Date               time.Time `json:"date" db:"date"`
+	ProductDescription string    `json:"product_description" db:"product_description"`
+	ProductPriceCents  string    `json:"product_price_cents" db:"product_price_cents"`
+	SellerName         string    `json:"seller_name" db:"seller_name"`
+	SellerType         string    `json:"seller_type" db:"seller_type"`
 }
 
 func (t Transaction) typ() (string, error) {
