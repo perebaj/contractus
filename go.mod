@@ -8,7 +8,6 @@ require (
 	github.com/golangci/golangci-lint v1.54.2
 	github.com/jmoiron/sqlx v1.3.5
 	go.uber.org/mock v0.3.0
-	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
 	golang.org/x/vuln v1.0.1
 )
 
@@ -173,6 +172,7 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
+	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea // indirect
 	golang.org/x/exp/typeparams v0.0.0-20230307190834-24139beb5833 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect

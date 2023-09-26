@@ -8,10 +8,11 @@ import (
 	"syscall"
 	"time"
 
+	"log/slog"
+
 	"github.com/birdie-ai/contractus/api"
 	"github.com/birdie-ai/contractus/postgres"
 	"github.com/go-chi/chi/v5"
-	"golang.org/x/exp/slog"
 )
 
 // Config have the core configuration for the service.

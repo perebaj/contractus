@@ -1,4 +1,5 @@
 export GO_VERSION=1.21.1
+export GOLANGCI_LINT_VERSION=v1.54.0
 
 base_image=registry.heroku.com/contractus/web
 version:=$(shell git rev-parse --short HEAD)
@@ -38,7 +39,7 @@ integration-test:
 ## Run lint
 .PHONY: lint
 lint:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./... -v
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run ./... -v
 	go run golang.org/x/vuln/cmd/govulncheck ./...
 
 ## Create a new migration, use make migration/new name=<migration_name>
@@ -81,6 +82,12 @@ migration/drop: param-CONTRACTUS_POSTGRES_URL
 		-database=$(CONTRACTUS_POSTGRES_URL) \
 		-verbose \
 		drop
+
+## Clean containers, images and volumes
+.PHONY: dev/clean
+dev/clean:
+	@echo "Cleaning containers, images and volumes..."
+	@docker-compose down --rmi all --volumes --remove-orphans
 
 ## Build dev image service
 .PHONY: dev/image
