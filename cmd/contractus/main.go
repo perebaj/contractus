@@ -18,11 +18,12 @@ import (
 // Config have the core configuration for the service.
 type Config struct {
 	PORT     string
+	LogLevel string
+	LogType  string // json or text
 	Postgres postgres.Config
 }
 
 func main() {
-	fmt.Println("Hello, playground")
 	cfg := Config{
 		PORT: getEnvWithDefault("PORT", "8080"),
 		Postgres: postgres.Config{
@@ -31,6 +32,14 @@ func main() {
 			MaxIdleConns:    5,
 			ConnMaxIdleTime: 1 * time.Minute,
 		},
+		LogLevel: getEnvWithDefault("LOG_LEVEL", "INFO"),
+		LogType:  getEnvWithDefault("LOG_TYPE", "json"),
+	}
+
+	err := setUpLog(cfg)
+	if err != nil {
+		slog.Error("Failed to set up logger", "error", err)
+		syscall.Exit(1)
 	}
 
 	db, err := postgres.OpenDB(cfg.Postgres)
@@ -65,4 +74,38 @@ func getEnvWithDefault(key, defaultValue string) string {
 		return defaultValue
 	}
 	return value
+}
+
+// setUpLog initialize the logger.
+func setUpLog(cfg Config) error {
+
+	var level slog.Level
+	switch cfg.LogLevel {
+	case "INFO":
+		level = slog.LevelInfo
+	case "DEBUG":
+		level = slog.LevelDebug
+	case "WARN":
+		level = slog.LevelWarn
+	case "ERROR":
+		level = slog.LevelError
+	default:
+		return fmt.Errorf("invalid log level: %s", cfg.LogLevel)
+	}
+
+	var logger *slog.Logger
+	if cfg.LogType == "json" {
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			Level: level,
+		}))
+	} else if cfg.LogType == "text" {
+		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			Level: level,
+		}))
+	} else {
+		return fmt.Errorf("invalid log type: %s", cfg.LogType)
+	}
+
+	slog.SetDefault(logger)
+	return nil
 }
