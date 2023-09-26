@@ -1,8 +1,8 @@
 package postgres
 
 import (
-	"github.com/birdie-ai/contractus"
 	"github.com/jmoiron/sqlx"
+	"github.com/perebaj/contractus"
 )
 
 // Storage deal with the database layer for transactions.
@@ -45,3 +45,7 @@ func (s Storage) Transactions() (contractus.TransactionResponse, error) {
 		Total:        len(transactions),
 	}, nil
 }
+
+// func (s Storage) Balance(ctx context.Context) error {
+// 	return nil
+// }

@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/birdie-ai/contractus"
-	"github.com/birdie-ai/contractus/postgres"
 	"github.com/jmoiron/sqlx"
+	"github.com/perebaj/contractus"
+	"github.com/perebaj/contractus/postgres"
 )
 
 // OpenDB create a new database for testing and return a connection to it.
