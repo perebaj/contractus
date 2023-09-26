@@ -1,0 +1,149 @@
+openapi: '3.0.2'
+info:
+  title: API
+  description: API description
+  version: 0.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /health:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                default: 'Jojo is awesome!'
+  /upload:
+    post:
+      summary: Upload a transaction file
+      tags:
+        - "transactions"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                default: 'File uploaded!'
+  /transactions:
+    get:
+      summary: Return all transactions
+      tags:
+        - "transactions"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                  count: 
+                    type: integer
+                    description: Total number of transactions
+  /balance/affiliate:
+    get:
+      summary: Return balance for an affiliate
+      tags:
+        - transactions
+      parameters:
+        - name: name
+          in: query
+          description: Affiliate name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    description: Balance for affiliate
+                  seller_name:
+                    type: string
+                    description: Affiliate name
+          
+  /balance/producer:
+    get:
+      parameters:
+        - name: name
+          in: query
+          description: Producer name
+          required: true
+          schema:
+            type: string
+      summary: Return balance for a producer
+      tags:
+        - transactions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    description: Balance for producer
+                  seller_name:
+                    type: string
+                    description: Producer name
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code error
+        message:
+          type: string
+          description: Error message
+    Transaction:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Transaction type
+        date:
+          type: string
+          format: date-time
+          description: Transaction date
+        productDescription:
+          type: string
+          description:  Production description
+        productPrice:
+          type: string
+          description: Production price
+        sellerName:
+          type: string
+          description: Seller name
+        sellerType:
+          type: string
+          description: Seller type
+          enum:
+            - affiliate
+            - producer
