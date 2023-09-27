@@ -71,3 +71,34 @@ Response:
   "seller_name": "string"
 }
 ```
+
+## `/transactions`
+
+List all transactions
+
+Request: 
+
+```bash
+curl -i -X 'GET' \
+  'http://localhost:8080/transactions' \
+  -H 'accept: application/json'
+```
+
+Response:
+
+```JSON
+{
+  "transactions": [
+    {
+      "type": "string",
+      "date": "2023-09-27T17:27:14.189Z",
+      "productDescription": "string",
+      "productPrice": "string",
+      "sellerName": "string",
+      "sellerType": "affiliate",
+      "action": "venda produtor"
+    }
+  ],
+  "total": 0
+}
+```
