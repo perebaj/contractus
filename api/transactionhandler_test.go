@@ -62,7 +62,7 @@ func TestTransactionHandlerBalanceProducer(t *testing.T) {
 	r := chi.NewRouter()
 	RegisterHandler(r, m)
 
-	req := httptest.NewRequest(http.MethodGet, "/balance/producer?name=JOSE", nil)
+	req := httptest.NewRequest(http.MethodGet, "/balance/producer?name=JOSE%20CARLOS", nil)
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
@@ -77,7 +77,7 @@ func TestTransactionHandlerBalanceAffiliate(t *testing.T) {
 	r := chi.NewRouter()
 	RegisterHandler(r, m)
 
-	req := httptest.NewRequest(http.MethodGet, "/balance/affiliate?name=JOSE", nil)
+	req := httptest.NewRequest(http.MethodGet, "/balance/affiliate?name=JOSE%20CARLOS", nil)
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
