@@ -62,14 +62,14 @@ func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Reque
 	query := r.URL.Query()
 	name := query.Get("name")
 	if name == "" {
-		sendErr(w, http.StatusBadRequest, fmt.Errorf("name is required"))
+		sendErr(w, http.StatusBadRequest, Error{"name_required", "name is required"})
 		return
 	}
 
 	b, err := s.storage.Balance(r.Context(), "producer", name)
 	if err != nil {
 		if err == postgres.ErrSellerNotFound {
-			sendErr(w, http.StatusNotFound, postgres.ErrSellerNotFound)
+			sendErr(w, http.StatusNotFound, Error{"seller_not_found", "seller not found"})
 			return
 		}
 		sendErr(w, http.StatusInternalServerError, err)
@@ -83,14 +83,14 @@ func (s transactionHandler) affiliateBalance(w http.ResponseWriter, r *http.Requ
 	query := r.URL.Query()
 	name := query.Get("name")
 	if name == "" {
-		sendErr(w, http.StatusBadRequest, fmt.Errorf("name is required"))
+		sendErr(w, http.StatusBadRequest, Error{"name_required", "name is required"})
 		return
 	}
 
 	b, err := s.storage.Balance(r.Context(), "affiliate", name)
 	if err != nil {
 		if err == postgres.ErrSellerNotFound {
-			sendErr(w, http.StatusNotFound, postgres.ErrSellerNotFound)
+			sendErr(w, http.StatusNotFound, Error{"seller_not_found", "seller not found"})
 			return
 		}
 		sendErr(w, http.StatusInternalServerError, err)
@@ -104,14 +104,14 @@ func (s transactionHandler) upload(w http.ResponseWriter, r *http.Request) {
 	content, err := parseFile(r)
 	if err != nil {
 		slog.Error("Failed to parse file", "error", err)
-		sendErr(w, http.StatusBadRequest, err)
+		sendErr(w, http.StatusBadRequest, Error{"invalid_file", "invalid file"})
 		return
 	}
 
 	transactions, err := convert(content)
 	if err != nil {
 		slog.Error("Failed to convert transactions", "error", err, "content", content)
-		sendErr(w, http.StatusBadRequest, err)
+		sendErr(w, http.StatusBadRequest, Error{"invalid_file", "invalid file"})
 		return
 	}
 	err = s.storage.SaveTransaction(r.Context(), transactions)
