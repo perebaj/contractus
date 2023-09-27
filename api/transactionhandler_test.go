@@ -105,3 +105,26 @@ func TestTransactionHandlerTransactions(t *testing.T) {
 		t.Fatalf("expected status code %d, got %d", http.StatusOK, resp.Code)
 	}
 }
+
+func TestSwagger(t *testing.T) {
+	m := &mockTransactionStorage{}
+	r := chi.NewRouter()
+	RegisterHandler(r, m)
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Fatalf("expected status code %d, got %d", http.StatusOK, resp.Code)
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/docs/api.yml", nil)
+	resp = httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+	if resp.Code != http.StatusOK {
+		t.Fatalf("expected status code %d, got %d", http.StatusOK, resp.Code)
+	}
+}

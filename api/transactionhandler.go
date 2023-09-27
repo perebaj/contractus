@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 	"log/slog"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/perebaj/contractus"
 	"github.com/perebaj/contractus/postgres"
 )
@@ -24,6 +26,9 @@ type transactionStorage interface {
 type transactionHandler struct {
 	storage transactionStorage
 }
+
+//go:embed docs/api.yml
+var swagger embed.FS
 
 // RegisterHandler gather all the handlers for the API.
 func RegisterHandler(r chi.Router, storage transactionStorage) {
@@ -42,6 +47,15 @@ func RegisterHandler(r chi.Router, storage transactionStorage) {
 
 	const transactions = "/transactions"
 	r.Method(http.MethodGet, transactions, http.HandlerFunc(h.transactions))
+
+	// Register swagger docs.
+	opts := middleware.SwaggerUIOpts{SpecURL: "docs/api.yml",
+		Path:  "/",
+		Title: "Contractus API",
+	}
+	sh := middleware.SwaggerUI(opts, nil)
+	r.Handle("/", sh)
+	r.Handle("/docs/api.yml", http.FileServer(http.FS(swagger)))
 }
 
 func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Request) {
