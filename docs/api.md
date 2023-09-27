@@ -4,17 +4,14 @@ Basic usage examples of the contractus API
 
 # Endpoints
 
-## `/jojo`
-    
+## `/upload`
+
 Request:
 
 ```
-curl http://localhost:8080/jojo
+    curl -i -X 'POST' \
+        'http://localhost:8080/upload' \
+        -H 'accept: application/json' \
+        -H 'Content-Type: multipart/form-data' \
+        -F 'file=@sales.txt;type=text/plain'
 ```
-
-Response:
-
-```
-Jojo is aweasome!
-```
-

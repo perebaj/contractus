@@ -4,6 +4,7 @@ CREATE TABLE transactions (
     product_description TEXT NOT NULL,
     product_price_cents INT NOT NULL,
     seller_name TEXT NOT NULL,
-    seller_type TEXT NOT NULL
+    seller_type TEXT NOT NULL,
+    action TEXT NOT NULL
 );
 
