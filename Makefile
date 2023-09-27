@@ -34,7 +34,7 @@ test:
 ## Run integration tests
 .PHONY: integration-test
 integration-test:
-	go test -tags integration -run="$(testcase)" ./...
+	go test -tags integration -run="$(testcase)" -cover ./...
 
 ## Run lint
 .PHONY: lint

@@ -6,16 +6,6 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
-  /health:
-    get:
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                default: 'Jojo is awesome!'
   /upload:
     post:
       summary: Upload a transaction file
@@ -79,6 +69,12 @@ paths:
                   seller_name:
                     type: string
                     description: Affiliate name
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
           
   /balance/producer:
     get:
@@ -106,6 +102,12 @@ paths:
                   seller_name:
                     type: string
                     description: Producer name
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     ErrorResponse:
@@ -114,7 +116,7 @@ components:
         code:
           type: string
           description: Error code error
-        message:
+        msg:
           type: string
           description: Error message
     Transaction:

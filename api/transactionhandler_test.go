@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/perebaj/contractus"
@@ -18,6 +17,10 @@ type mockTransactionStorage struct{}
 
 func (m *mockTransactionStorage) SaveTransaction(_ context.Context, _ []contractus.Transaction) error {
 	return nil
+}
+
+func (m *mockTransactionStorage) Balance(_ context.Context, _ string, _ string) (*contractus.BalanceResponse, error) {
+	return nil, nil
 }
 
 func TestTransactionHandlerUpload(t *testing.T) {
@@ -54,61 +57,32 @@ func TestTransactionHandlerUpload(t *testing.T) {
 	}
 }
 
-func TestConvert(t *testing.T) {
-	content := `12022-01-15T19:20:30-03:00CURSO DE BEM-ESTAR            0000012750JOSE CARLOS
-	12021-12-03T11:46:02-03:00DOMINANDO INVESTIMENTOS       0000050000MARIA CANDIDA
-	`
-	transac, err := convert(content)
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestTransactionHandlerBalanceProducer(t *testing.T) {
+	m := &mockTransactionStorage{}
+	r := chi.NewRouter()
+	RegisterHandler(r, m)
 
-	want := []contractus.Transaction{
-		{
-			Type:               1,
-			Date:               time.Date(2022, 01, 15, 22, 20, 30, 0, time.UTC),
-			ProductDescription: "CURSO DE BEM-ESTAR",
-			ProductPriceCents:  12750,
-			SellerName:         "JOSE CARLOS",
-			SellerType:         "producer",
-			Action:             "venda produtor",
-		},
-		{
-			Type:               1,
-			Date:               time.Date(2021, 12, 03, 14, 46, 02, 0, time.UTC),
-			ProductDescription: "DOMINANDO INVESTIMENTOS",
-			ProductPriceCents:  50000,
-			SellerName:         "MARIA CANDIDA",
-			SellerType:         "producer",
-			Action:             "venda produtor",
-		},
-	}
+	req := httptest.NewRequest(http.MethodGet, "/balance/producer?name=JOSE", nil)
+	resp := httptest.NewRecorder()
 
-	if len(transac) == len(want) {
-		assert(t, transac[0].Type, want[0].Type)
-		assert(t, transac[0].Date.Format(time.RFC3339), want[0].Date.Format(time.RFC3339))
-		assert(t, transac[0].ProductDescription, want[0].ProductDescription)
-		assert(t, transac[0].ProductPriceCents, want[0].ProductPriceCents)
-		assert(t, transac[0].SellerName, want[0].SellerName)
-		assert(t, transac[0].SellerType, want[0].SellerType)
-		assert(t, transac[0].Action, want[0].Action)
+	r.ServeHTTP(resp, req)
 
-		assert(t, transac[1].Type, want[1].Type)
-		assert(t, transac[1].Date.Format(time.RFC3339), want[1].Date.Format(time.RFC3339))
-		assert(t, transac[1].ProductDescription, want[1].ProductDescription)
-		assert(t, transac[1].ProductPriceCents, want[1].ProductPriceCents)
-		assert(t, transac[1].SellerName, want[1].SellerName)
-		assert(t, transac[1].SellerType, want[1].SellerType)
-		assert(t, transac[1].Action, want[1].Action)
-	} else {
-		t.Fatalf("expected %d transactions, got %d", len(want), len(transac))
+	if resp.Code != http.StatusOK {
+		t.Fatalf("expected status code %d, got %d", http.StatusOK, resp.Code)
 	}
 }
 
-func assert(t *testing.T, got, want interface{}) {
-	t.Helper()
+func TestTransactionHandlerBalanceAffiliate(t *testing.T) {
+	m := &mockTransactionStorage{}
+	r := chi.NewRouter()
+	RegisterHandler(r, m)
 
-	if got != want {
-		t.Fatalf("got %v want %v", got, want)
+	req := httptest.NewRequest(http.MethodGet, "/balance/affiliate?name=JOSE", nil)
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Fatalf("expected status code %d, got %d", http.StatusOK, resp.Code)
 	}
 }

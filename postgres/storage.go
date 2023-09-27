@@ -2,9 +2,15 @@ package postgres
 
 import (
 	"context"
+	"errors"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/perebaj/contractus"
+)
+
+var (
+	// ErrSellerNotFound is returned when the seller is not found in the database.
+	ErrSellerNotFound = errors.New("seller not found")
 )
 
 // Storage deal with the database layer for transactions.
@@ -58,6 +64,9 @@ func (s Storage) Balance(ctx context.Context, sellerType, sellerName string) (*c
 		WHERE seller_type = $1 AND seller_name = $2
 	`, sellerType, sellerName)
 
+	if len(transactions) == 0 {
+		return nil, ErrSellerNotFound
+	}
 	if err != nil {
 		return nil, err
 	}

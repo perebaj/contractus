@@ -5,6 +5,7 @@ package postgres_test
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -251,6 +252,36 @@ func TestStorageBalance(t *testing.T) {
 
 	assert(t, got.Balance, int64(205000))
 	assert(t, got.SellerName, "CARLOS BATISTA")
+}
+
+func TestStorageBalance_NotFound(t *testing.T) {
+	db := OpenDB(t)
+	storage := postgres.NewStorage(db)
+	ctx := context.Background()
+
+	transactions1 := []contractus.Transaction{
+		{
+			Type:               1,
+			Date:               time.Now().UTC(),
+			ProductDescription: "Product description",
+			ProductPriceCents:  12750,
+			SellerName:         "JOSE CARLOS",
+			SellerType:         "producer",
+			Action:             "venda produtor",
+		},
+	}
+
+	err := storage.SaveTransaction(ctx, transactions1)
+	if err != nil {
+		t.Fatalf("error saving transactions 1: %v", err)
+	}
+
+	got, err := storage.Balance(ctx, "producer", "INVALID NAME")
+	if !errors.Is(err, postgres.ErrSellerNotFound) {
+		t.Fatalf("error getting balance: %v", err)
+	}
+
+	assert(t, got, (*contractus.BalanceResponse)(nil))
 }
 
 func assert(t *testing.T, got, want interface{}) {
