@@ -25,7 +25,7 @@ This route is responsible to retrieve the balance for a given affiliate name
 
 **name:** Name of the seller 
 
-Obs: If the user's name is "JONATHAN SILVA," it should be input as `?name=JONATHAN%20SILVA` to ensure proper search functionality.
+Obs: If the affilate's name is "JONATHAN SILVA," it should be input as `?name=JONATHAN%20SILVA` to ensure proper search functionality.
 
 Request: 
 
@@ -52,7 +52,7 @@ This route is responsible to retrieve the balance for a given producer name
 
 **name:** Name of the seller 
 
-Obs: If the user's name is "JONATHAN SILVA," it should be input as `?name=JONATHAN%20SILVA` to ensure proper search functionality.
+Obs: If the producer's name is "JONATHAN SILVA," it should be input as `?name=JONATHAN%20SILVA` to ensure proper search functionality.
 
 
 Request: 
