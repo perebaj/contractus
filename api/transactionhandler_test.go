@@ -23,6 +23,10 @@ func (m *mockTransactionStorage) Balance(_ context.Context, _ string, _ string) 
 	return nil, nil
 }
 
+func (m *mockTransactionStorage) Transactions(_ context.Context) (contractus.TransactionResponse, error) {
+	return contractus.TransactionResponse{}, nil
+}
+
 func TestTransactionHandlerUpload(t *testing.T) {
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
@@ -78,6 +82,21 @@ func TestTransactionHandlerBalanceAffiliate(t *testing.T) {
 	RegisterHandler(r, m)
 
 	req := httptest.NewRequest(http.MethodGet, "/balance/affiliate?name=JOSE", nil)
+	resp := httptest.NewRecorder()
+
+	r.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Fatalf("expected status code %d, got %d", http.StatusOK, resp.Code)
+	}
+}
+
+func TestTransactionHandlerTransactions(t *testing.T) {
+	m := &mockTransactionStorage{}
+	r := chi.NewRouter()
+	RegisterHandler(r, m)
+
+	req := httptest.NewRequest(http.MethodGet, "/transactions", nil)
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
