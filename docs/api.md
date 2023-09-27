@@ -18,10 +18,19 @@ Request:
 
 ## `/balance/affiliate?name=<>`
 
+This route is responsible to retrieve the balance for a given affiliate name
+
+
+### Parameters
+
+**name:** Name of the seller 
+
+Obs: If the user's name is "JONATHAN SILVA," it should be input as `?name=JONATHAN%20SILVA` to ensure proper search functionality.
+
 Request: 
 
 ```bash
-curl -X 'GET' \
+curl -X -i 'GET' \
   'http://localhost:8080/balance/affiliate?name=<>' \
   -H 'accept: application/json'
 ```
@@ -37,10 +46,19 @@ Response:
 
 ## `/balance/producer?name=<>`
 
+This route is responsible to retrieve the balance for a given producer name
+
+### Parameters
+
+**name:** Name of the seller 
+
+Obs: If the user's name is "JONATHAN SILVA," it should be input as `?name=JONATHAN%20SILVA` to ensure proper search functionality.
+
+
 Request: 
 
 ```bash
-curl -X 'GET' \
+curl -X -i 'GET' \
   'http://localhost:8080/balance/producer?name=<>' \
   -H 'accept: application/json'
 ```

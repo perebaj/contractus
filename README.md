@@ -50,3 +50,4 @@ The testcase variable could be used to run a specific test
 ## Attention points 
  - For a while, the integration-tests just ran locally not in CI, this increased the time to ship code 🚀
  - We already don't have a way to paginate transactions. 😔
+ - To publish images and new releases, for now, the only way is using the command line, isn't automate by CI yet 😔
