@@ -129,16 +129,16 @@ components:
           type: string
           format: date-time
           description: Transaction date
-        productDescription:
+        product_description:
           type: string
           description:  Production description
-        productPrice:
+        product_price:
           type: string
           description: Production price
-        sellerName:
+        seller_name:
           type: string
           description: Seller name
-        sellerType:
+        seller_type:
           type: string
           description: Seller type
           enum:

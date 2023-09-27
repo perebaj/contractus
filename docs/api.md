@@ -91,11 +91,11 @@ Response:
   "transactions": [
     {
       "type": "string",
-      "date": "2023-09-27T17:27:14.189Z",
-      "productDescription": "string",
-      "productPrice": "string",
-      "sellerName": "string",
-      "sellerType": "affiliate",
+      "date": "2023-09-27T17:34:41.455Z",
+      "product_description": "string",
+      "product_price": "string",
+      "seller_name": "string",
+      "seller_type": "affiliate",
       "action": "venda produtor"
     }
   ],
