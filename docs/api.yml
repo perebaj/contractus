@@ -33,11 +33,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                default: 'File uploaded!'
   /transactions:
     get:
       summary: Return all transactions
@@ -55,9 +50,9 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Transaction'
-                  count: 
+                  total: 
                     type: integer
-                    description: Total number of transactions
+                    description: Number of transactions
   /balance/affiliate:
     get:
       summary: Return balance for an affiliate
@@ -147,3 +142,11 @@ components:
           enum:
             - affiliate
             - producer
+        action:
+          type: string
+          description: Transaction action
+          enum:
+            - venda produtor
+            - venda afiliado
+            - comissão afiliado
+            - comissão produtor

@@ -20,11 +20,11 @@ func NewStorage(db *sqlx.DB) *Storage {
 }
 
 // SaveTransaction is responsible for saving a transaction into the database.
-func (s Storage) SaveTransaction(ctx context.Context, t *contractus.Transaction) error {
-	_, err := s.db.ExecContext(ctx, `
-		INSERT INTO transactions (type, date, product_description, product_price_cents, seller_name, seller_type)
-		VALUES ($1, $2, $3, $4, $5, $6)
-	`, t.Type, t.Date, t.ProductDescription, t.ProductPriceCents, t.SellerName, t.SellerType)
+func (s Storage) SaveTransaction(ctx context.Context, t []contractus.Transaction) error {
+	_, err := s.db.NamedExecContext(ctx, `
+		INSERT INTO transactions (type, date, product_description, product_price_cents, seller_name, seller_type, action)
+		VALUES (:type, :date, :product_description, :product_price_cents, :seller_name, :seller_type, :action)
+	`, t)
 
 	return err
 }
@@ -35,7 +35,7 @@ func (s Storage) Transactions(ctx context.Context) (contractus.TransactionRespon
 	var transactions []contractus.Transaction
 
 	err := s.db.SelectContext(ctx, &transactions, `
-		SELECT type, date, product_description, product_price_cents, seller_name, seller_type
+		SELECT type, date, product_description, product_price_cents, seller_name, seller_type, action
 		FROM transactions
 	`)
 	if err != nil {

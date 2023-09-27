@@ -26,9 +26,11 @@ type Transaction struct {
 	ProductPriceCents  int64     `json:"product_price_cents" db:"product_price_cents"`
 	SellerName         string    `json:"seller_name" db:"seller_name"`
 	SellerType         string    `json:"seller_type" db:"seller_type"`
+	Action             string    `json:"action" db:"action"`
 }
 
-func (t Transaction) typ() (string, error) {
+// ConvertType convert the transaction type from his code to the string representation.
+func (t *Transaction) ConvertType() (string, error) {
 	switch t.Type {
 	case 1:
 		return "venda produtor", nil
@@ -43,7 +45,8 @@ func (t Transaction) typ() (string, error) {
 	}
 }
 
-func (t Transaction) sellerType() (string, error) {
+// ConvertSellerType convert the seller type from his code to the string representation.
+func (t *Transaction) ConvertSellerType() (string, error) {
 	switch t.Type {
 	case 1, 3:
 		return "producer", nil

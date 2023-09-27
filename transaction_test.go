@@ -49,7 +49,7 @@ func TestTransactionTyp(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.transaction.typ()
+			got, err := tt.transaction.ConvertType()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("typ() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -107,7 +107,7 @@ func TestTransactionSellerType(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.transaction.sellerType()
+			got, err := tt.transaction.ConvertSellerType()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("sellerType() error = %v, wantErr %v", err, tt.wantErr)
 			}
