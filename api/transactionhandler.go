@@ -18,6 +18,7 @@ import (
 type transactionStorage interface {
 	SaveTransaction(ctx context.Context, t []contractus.Transaction) error
 	Balance(ctx context.Context, sellerType, sellerName string) (*contractus.BalanceResponse, error)
+	Transactions(ctx context.Context) (contractus.TransactionResponse, error)
 }
 
 type transactionHandler struct {
@@ -38,6 +39,9 @@ func RegisterHandler(r chi.Router, storage transactionStorage) {
 
 	const upload = "/upload"
 	r.Method(http.MethodPost, upload, http.HandlerFunc(h.upload))
+
+	const transactions = "/transactions"
+	r.Method(http.MethodGet, transactions, http.HandlerFunc(h.transactions))
 }
 
 func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Request) {
@@ -104,6 +108,16 @@ func (s transactionHandler) upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	send(w, http.StatusOK, nil)
+}
+
+func (s transactionHandler) transactions(w http.ResponseWriter, r *http.Request) {
+	tResponse, err := s.storage.Transactions(r.Context())
+	if err != nil {
+		sendErr(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	send(w, http.StatusOK, tResponse)
 }
 
 // Transaction represents the raw transaction from the file.
