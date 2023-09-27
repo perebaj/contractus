@@ -45,7 +45,7 @@ The testcase variable could be used to run a specific test
     `heroku logs --tail -a contractus`
 
 ## API documentation
-
+[API Docs](api/docs/)
 
 ## Attention points 
  - For a while, the integration-tests just ran locally not in CI, this increased the time to ship code 🚀
