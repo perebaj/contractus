@@ -12,10 +12,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/perebaj/contractus"
+	"github.com/perebaj/contractus/postgres"
 )
 
 type transactionStorage interface {
 	SaveTransaction(ctx context.Context, t []contractus.Transaction) error
+	Balance(ctx context.Context, sellerType, sellerName string) (*contractus.BalanceResponse, error)
 }
 
 type transactionHandler struct {
@@ -29,18 +31,55 @@ func RegisterHandler(r chi.Router, storage transactionStorage) {
 	}
 
 	const balanceProducer = "/balance/producer"
-	r.Method(http.MethodGet, balanceProducer, http.HandlerFunc(h.balance))
+	r.Method(http.MethodGet, balanceProducer, http.HandlerFunc(h.producerBalance))
+
+	const balanceAffiliate = "/balance/affiliate"
+	r.Method(http.MethodGet, balanceAffiliate, http.HandlerFunc(h.affiliateBalance))
 
 	const upload = "/upload"
 	r.Method(http.MethodPost, upload, http.HandlerFunc(h.upload))
 }
 
-func (s transactionHandler) balance(w http.ResponseWriter, _ *http.Request) {
-	t := struct {
-		ProducerID string `json:"producer_id"`
-	}{ProducerID: "123"}
+func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	name := query.Get("name")
+	if name == "" {
+		sendErr(w, http.StatusBadRequest, fmt.Errorf("name is required"))
+		return
+	}
 
-	send(w, http.StatusOK, t)
+	b, err := s.storage.Balance(r.Context(), "producer", name)
+	if err != nil {
+		if err == postgres.ErrSellerNotFound {
+			sendErr(w, http.StatusNotFound, postgres.ErrSellerNotFound)
+			return
+		}
+		sendErr(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	send(w, http.StatusOK, b)
+}
+
+func (s transactionHandler) affiliateBalance(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	name := query.Get("name")
+	if name == "" {
+		sendErr(w, http.StatusBadRequest, fmt.Errorf("name is required"))
+		return
+	}
+
+	b, err := s.storage.Balance(r.Context(), "affiliate", name)
+	if err != nil {
+		if err == postgres.ErrSellerNotFound {
+			sendErr(w, http.StatusNotFound, postgres.ErrSellerNotFound)
+			return
+		}
+		sendErr(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	send(w, http.StatusOK, b)
 }
 
 func (s transactionHandler) upload(w http.ResponseWriter, r *http.Request) {

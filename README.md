@@ -39,7 +39,7 @@ The testcase variable could be used to run a specific test
 
 ## Ship a new version
     `make image/publish`
-    `heroky container:release web -a contractus`
+    `heroku container:release web -a contractus`
 
 ## Logs in production
     `heroku logs --tail -a contractus`

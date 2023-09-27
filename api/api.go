@@ -3,6 +3,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -23,13 +24,20 @@ type Error struct {
 func (e Error) Error() string {
 	return fmt.Sprintf("%s: %s", e.Code, e.Msg)
 }
-func sendErr(w http.ResponseWriter, statusCode int, err error) {
-	if statusCode >= 500 {
-		slog.Error("Internal server error", "error", err)
-	}
-	err = Error{Code: "internal_server_error error", Msg: "Internal server error"}
 
-	send(w, statusCode, err)
+func sendErr(w http.ResponseWriter, statusCode int, err error) {
+	var httpErr Error
+	if !errors.As(err, &httpErr) {
+		httpErr = Error{
+			Code: "unknown_error",
+			Msg:  "An unexpected error happened",
+		}
+	}
+	if statusCode >= 500 {
+		slog.Error("Unable to process request", "error", err.Error(), "status_code", statusCode)
+	}
+
+	send(w, statusCode, httpErr)
 }
 
 func send(w http.ResponseWriter, statusCode int, body interface{}) {
@@ -64,6 +72,7 @@ func parseFile(r *http.Request) (content string, err error) {
 	return string(contentByte), nil
 }
 
+// convert is an internal function responsible for converting the file content into transactions.
 func convert(content string) (t []contractus.Transaction, err error) {
 	content = strings.Replace(content, "\t", "", -1)
 	var re = regexp.MustCompile(`(?m).*$\n`)
