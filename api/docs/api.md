@@ -2,6 +2,8 @@
 
 Basic usage examples of the contractus API
 
+**@Obs**: To run locally, the right host to put in the <> is the host that will retrieve after running `make ip`
+
 # Endpoints
 
 ## `/upload`
@@ -30,7 +32,7 @@ Obs: If the affilate's name is "JONATHAN SILVA," it should be input as `?name=JO
 Request: 
 
 ```bash
-curl -X -i 'GET' \
+curl -i -X 'GET' \
   'http://<>:8080/balance/affiliate?name=<>' \
   -H 'accept: application/json'
 ```
@@ -58,7 +60,7 @@ Obs: If the producer's name is "JONATHAN SILVA," it should be input as `?name=JO
 Request: 
 
 ```bash
-curl -X -i 'GET' \
+curl -i -X 'GET' \
   'http://<>:8080/balance/producer?name=<>' \
   -H 'accept: application/json'
 ```
