@@ -10,7 +10,7 @@ Request:
 
 ```bash
     curl -i -X 'POST' \
-        'http://localhost:8080/upload' \
+        'http://<>:8080/upload' \
         -H 'accept: application/json' \
         -H 'Content-Type: multipart/form-data' \
         -F 'file=@sales.txt;type=text/plain'
@@ -31,7 +31,7 @@ Request:
 
 ```bash
 curl -X -i 'GET' \
-  'http://localhost:8080/balance/affiliate?name=<>' \
+  'http://<>:8080/balance/affiliate?name=<>' \
   -H 'accept: application/json'
 ```
 
@@ -59,7 +59,7 @@ Request:
 
 ```bash
 curl -X -i 'GET' \
-  'http://localhost:8080/balance/producer?name=<>' \
+  'http://<>:8080/balance/producer?name=<>' \
   -H 'accept: application/json'
 ```
 
@@ -80,7 +80,7 @@ Request:
 
 ```bash
 curl -i -X 'GET' \
-  'http://localhost:8080/transactions' \
+  'http://<>:8080/transactions' \
   -H 'accept: application/json'
 ```
 

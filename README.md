@@ -12,11 +12,11 @@ Jamming around orders with API endpoints 🎸
 
 ## Environment Variables
 
-To start the service locally, you need to export the current environment variables:
+To start the service locally, you can type `make dev/start` and after that you can use the docker container IP to play around the routes, `make ip`
 
-    export CONTRACTUS_POSTGRES_URL=<>
+Request example:
 
-But, to play around the code and tests, it's possible with the command line ⤵️⤵️⤵️
+    curl http://(make ip):8080
 
 ## Command line
 All commands are synthesized in the Makefile, to start the development environment, just run:
@@ -49,5 +49,5 @@ The testcase variable could be used to run a specific test
 
 ## Attention points 
  - For a while, the integration-tests just ran locally not in CI, this increased the time to ship code 🚀
- - We already don't have a way to paginate transactions. 😔
+ - We don't have a way to paginate transactions. 😔
  - To publish images and new releases, for now, the only way is using the command line, isn't automate by CI yet 😔

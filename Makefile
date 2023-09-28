@@ -132,6 +132,11 @@ dev:
 dev/%:
 	@$(devrun) make ${*}
 
+## API IP
+.PHONY: ip
+ip:
+	@docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' contractus_contractus_1
+
 ## Display help for all targets
 .PHONY: help
 help:
