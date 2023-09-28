@@ -26,6 +26,8 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
     restart: unless-stopped
+    ports:
+      - 5432:5432
     healthcheck:
       test: pg_isready -U postgres
       interval: 2s
