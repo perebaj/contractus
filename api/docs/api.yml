@@ -179,6 +179,9 @@ components:
     Transaction:
       type: object
       properties:
+        email: 
+          type: string
+          description: User email
         type:
           type: string
           description: Transaction type

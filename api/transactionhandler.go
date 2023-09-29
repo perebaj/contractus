@@ -65,7 +65,7 @@ func RegisterSwaggerHandler(r chi.Router) {
 func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Request) {
 	email, err := emailFromRequest(r)
 	if err != nil {
-		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
+		sendErr(w, http.StatusUnauthorized, Error{"user unauthorized", "user unauthorized"})
 		return
 	}
 
@@ -92,7 +92,7 @@ func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Reque
 func (s transactionHandler) affiliateBalance(w http.ResponseWriter, r *http.Request) {
 	email, err := emailFromRequest(r)
 	if err != nil {
-		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
+		sendErr(w, http.StatusUnauthorized, Error{"unauthorized_request", "unauthoriz"})
 		return
 	}
 	query := r.URL.Query()
@@ -118,7 +118,7 @@ func (s transactionHandler) affiliateBalance(w http.ResponseWriter, r *http.Requ
 func (s transactionHandler) upload(w http.ResponseWriter, r *http.Request) {
 	email, err := emailFromRequest(r)
 	if err != nil {
-		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
+		sendErr(w, http.StatusUnauthorized, Error{"unauthorized_request", "unauthorized request"})
 		return
 	}
 
@@ -148,7 +148,7 @@ func (s transactionHandler) upload(w http.ResponseWriter, r *http.Request) {
 func (s transactionHandler) transactions(w http.ResponseWriter, r *http.Request) {
 	email, err := emailFromRequest(r)
 	if err != nil {
-		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
+		sendErr(w, http.StatusUnauthorized, Error{"unauthorized_request", "unauthoriz"})
 		return
 	}
 
@@ -222,5 +222,10 @@ func emailFromRequest(r *http.Request) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to get claims from context: %v", err)
 	}
+
+	if claims["email"] == "" {
+		return "", fmt.Errorf("failed to get email from claims: %v", err)
+	}
+
 	return claims["email"].(string), nil
 }

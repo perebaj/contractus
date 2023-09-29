@@ -47,16 +47,9 @@ func TestTransactionHandlerUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 	m := &mockTransactionStorage{}
-	r := chi.NewRouter()
 
-	tokenAuth := jwtauth.New("HS256", []byte("secret"), nil)
-	_, token, _ := tokenAuth.Encode(map[string]interface{}{"email": "jj@example.com"})
-
-	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator)
-		RegisterTransactionsHandler(r, m)
-	})
+	token, authConfig := authTest(t)
+	r := Router(authConfig, m)
 
 	req := httptest.NewRequest(http.MethodPost, "/upload", &b)
 	req.Header.Set("Content-Type", w.FormDataContentType())
@@ -73,17 +66,24 @@ func TestTransactionHandlerUpload(t *testing.T) {
 	}
 }
 
-func TestTransactionHandlerBalanceProducer(t *testing.T) {
-	tokenAuth := jwtauth.New("HS256", []byte("secret"), nil)
-	_, token, _ := tokenAuth.Encode(map[string]interface{}{"email": "jj@example.com"})
-
+func TestTransactionHandlerUpload_Unauthorized(t *testing.T) {
+	_, authConfig := authTest(t)
 	m := &mockTransactionStorage{}
-	r := chi.NewRouter()
-	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator)
-		RegisterTransactionsHandler(r, m)
-	})
+	r := Router(authConfig, m)
+
+	req := httptest.NewRequest(http.MethodPost, "/upload", nil)
+	resp := httptest.NewRecorder()
+	r.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusUnauthorized {
+		t.Fatalf("expected status code %d, got %d", http.StatusUnauthorized, resp.Code)
+	}
+}
+
+func TestTransactionHandlerBalanceProducer(t *testing.T) {
+	token, authConfig := authTest(t)
+	m := &mockTransactionStorage{}
+	r := Router(authConfig, m)
 
 	req := httptest.NewRequest(http.MethodGet, "/balance/producer?name=JOSE%20CARLOS", nil)
 	req.AddCookie(&http.Cookie{
@@ -100,17 +100,24 @@ func TestTransactionHandlerBalanceProducer(t *testing.T) {
 	}
 }
 
-func TestTransactionHandlerBalanceAffiliate(t *testing.T) {
+func TestTransactionHandlerBalanceProducer_Unauthorized(t *testing.T) {
+	_, authConfig := authTest(t)
 	m := &mockTransactionStorage{}
-	r := chi.NewRouter()
-	tokenAuth := jwtauth.New("HS256", []byte("secret"), nil)
-	_, token, _ := tokenAuth.Encode(map[string]interface{}{"email": "jj@example.com"})
+	r := Router(authConfig, m)
 
-	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator)
-		RegisterTransactionsHandler(r, m)
-	})
+	req := httptest.NewRequest(http.MethodGet, "/balance/producer?name=JOSE%20CARLOS", nil)
+	resp := httptest.NewRecorder()
+	r.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusUnauthorized {
+		t.Fatalf("expected status code %d, got %d", http.StatusUnauthorized, resp.Code)
+	}
+}
+
+func TestTransactionHandlerBalanceAffiliate(t *testing.T) {
+	token, authConfig := authTest(t)
+	m := &mockTransactionStorage{}
+	r := Router(authConfig, m)
 
 	req := httptest.NewRequest(http.MethodGet, "/balance/affiliate?name=JOSE%20CARLOS", nil)
 	req.AddCookie(&http.Cookie{
@@ -128,16 +135,9 @@ func TestTransactionHandlerBalanceAffiliate(t *testing.T) {
 }
 
 func TestTransactionHandlerTransactions(t *testing.T) {
+	token, authConfig := authTest(t)
 	m := &mockTransactionStorage{}
-	r := chi.NewRouter()
-	tokenAuth := jwtauth.New("HS256", []byte("secret"), nil)
-	_, token, _ := tokenAuth.Encode(map[string]interface{}{"email": "jj@example.com"})
-
-	r.Group(func(r chi.Router) {
-		r.Use(jwtauth.Verifier(tokenAuth))
-		r.Use(jwtauth.Authenticator)
-		RegisterTransactionsHandler(r, m)
-	})
+	r := Router(authConfig, m)
 
 	req := httptest.NewRequest(http.MethodGet, "/transactions", nil)
 	req.AddCookie(&http.Cookie{
@@ -151,6 +151,20 @@ func TestTransactionHandlerTransactions(t *testing.T) {
 
 	if resp.Code != http.StatusOK {
 		t.Fatalf("expected status code %d, got %d", http.StatusOK, resp.Code)
+	}
+}
+
+func TestTransactionHandlerTransactions_Unauthorized(t *testing.T) {
+	_, authConfig := authTest(t)
+	m := &mockTransactionStorage{}
+	r := Router(authConfig, m)
+
+	req := httptest.NewRequest(http.MethodGet, "/transactions", nil)
+	resp := httptest.NewRecorder()
+	r.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusUnauthorized {
+		t.Fatalf("expected status code %d, got %d", http.StatusUnauthorized, resp.Code)
 	}
 }
 
@@ -174,4 +188,18 @@ func TestSwaggerHandler(t *testing.T) {
 	if resp.Code != http.StatusOK {
 		t.Fatalf("expected status code %d, got %d", http.StatusOK, resp.Code)
 	}
+}
+
+// authTest is a helper function to generate a JWT token and Auth struct for testing.
+func authTest(t *testing.T) (token string, authConfig Auth) {
+	t.Helper()
+	secretKey := "secret" //Fake secret Key
+	tokenAuth := jwtauth.New("HS256", []byte(secretKey), nil)
+	_, token, _ = tokenAuth.Encode(map[string]interface{}{"email": "jj@example.com"})
+
+	authConfig = Auth{
+		JWTSecretKey: secretKey,
+	}
+
+	return token, authConfig
 }

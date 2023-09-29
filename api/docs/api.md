@@ -92,6 +92,7 @@ Response:
 {
   "transactions": [
     {
+      "email": "jj@example.com",
       "type": "string",
       "date": "2023-09-27T17:34:41.455Z",
       "product_description": "string",
