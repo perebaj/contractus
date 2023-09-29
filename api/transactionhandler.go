@@ -63,7 +63,7 @@ func RegisterSwaggerHandler(r chi.Router) {
 }
 
 func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Request) {
-	email, err := emailFromToken(r)
+	email, err := emailFromRequest(r)
 	if err != nil {
 		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
 		return
@@ -90,7 +90,7 @@ func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Reque
 }
 
 func (s transactionHandler) affiliateBalance(w http.ResponseWriter, r *http.Request) {
-	email, err := emailFromToken(r)
+	email, err := emailFromRequest(r)
 	if err != nil {
 		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
 		return
@@ -116,7 +116,7 @@ func (s transactionHandler) affiliateBalance(w http.ResponseWriter, r *http.Requ
 }
 
 func (s transactionHandler) upload(w http.ResponseWriter, r *http.Request) {
-	email, err := emailFromToken(r)
+	email, err := emailFromRequest(r)
 	if err != nil {
 		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
 		return
@@ -217,7 +217,7 @@ func (t *Transaction) Convert(email string) (*contractus.Transaction, error) {
 	return transac, nil
 }
 
-func emailFromToken(r *http.Request) (string, error) {
+func emailFromRequest(r *http.Request) (string, error) {
 	_, claims, err := jwtauth.FromContext(r.Context())
 	if err != nil {
 		return "", fmt.Errorf("failed to get claims from context: %v", err)
