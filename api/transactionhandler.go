@@ -146,19 +146,19 @@ func (s transactionHandler) upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s transactionHandler) transactions(w http.ResponseWriter, r *http.Request) {
-	_, claims, _ := jwtauth.FromContext(r.Context())
-	if claims["email"] == nil {
+	email, err := emailFromRequest(r)
+	if err != nil {
 		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
 		return
 	}
-	email := claims["email"].(string)
-	tResponse, err := s.storage.Transactions(r.Context(), email)
+
+	t, err := s.storage.Transactions(r.Context(), email)
 	if err != nil {
 		sendErr(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	send(w, http.StatusOK, tResponse)
+	send(w, http.StatusOK, t)
 }
 
 // Transaction represents the raw transaction from the file.
