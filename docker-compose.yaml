@@ -11,7 +11,7 @@ services:
         GOLANGCI_LINT_VERSION: ${GOLANGCI_LINT_VERSION}
     environment:
       CONTRACTUS_POSTGRES_URL: postgres://postgres:postgres@postgres:5432/contractus?sslmode=disable
-      CONTRACTUS_GOOGLE_REDIRECT_URL: http://localhost:8080/callback
+      CONTRACTUS_DOMAIN: http://localhost:8080
       CONTRACTUS_JWT_SECRET_KEY: secret
       CONTRACTUS_ACCESS_TYPE: offline
     volumes:

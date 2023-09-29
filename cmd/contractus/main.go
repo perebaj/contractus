@@ -41,8 +41,8 @@ func main() {
 		Auth: api.Auth{
 			ClientID:     os.Getenv("CONTRACTUS_GOOGLE_CLIENT_ID"),
 			ClientSecret: os.Getenv("CONTRACTUS_GOOGLE_CLIENT_SECRET"),
-			RedirectURL:  os.Getenv("CONTRACTUS_GOOGLE_REDIRECT_URL"),
-			Domain:       getEnvWithDefault("CONTRACTUS_DOMAIN", "http://localhost:8080"),
+			Domain:       os.Getenv("CONTRACTUS_DOMAIN"), // Example: http://localhost:8080
+			RedirectURL:  os.Getenv("CONTRACTUS_DOMAIN") + "/callback",
 			JWTSecretKey: os.Getenv("CONTRACTUS_JWT_SECRET_KEY"),
 			AccessType:   getEnvWithDefault("CONTRACTUS_ACCESS_TYPE", "online"),
 		},
