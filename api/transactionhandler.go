@@ -27,11 +27,8 @@ type transactionHandler struct {
 	storage transactionStorage
 }
 
-//go:embed docs/api.yml
-var swagger embed.FS
-
-// RegisterHandler gather all the handlers for the API.
-func RegisterHandler(r chi.Router, storage transactionStorage) {
+// RegisterTransactionsHandler gather all the handlers for the API.
+func RegisterTransactionsHandler(r chi.Router, storage transactionStorage) {
 	h := transactionHandler{
 		storage: storage,
 	}
@@ -48,17 +45,25 @@ func RegisterHandler(r chi.Router, storage transactionStorage) {
 	const transactions = "/transactions"
 	r.Method(http.MethodGet, transactions, http.HandlerFunc(h.transactions))
 
-	// Register swagger docs.
+}
+
+//go:embed docs/api.yml
+var swagger embed.FS
+
+// RegisterSwaggerHandler register the the swagger endpoint.
+func RegisterSwaggerHandler(r chi.Router) {
 	opts := middleware.SwaggerUIOpts{SpecURL: "docs/api.yml",
-		Path:  "/",
+		Path:  "/docs",
 		Title: "Contractus API",
 	}
 	sh := middleware.SwaggerUI(opts, nil)
-	r.Handle("/", sh)
+	r.Handle("/docs", sh)
 	r.Handle("/docs/api.yml", http.FileServer(http.FS(swagger)))
 }
 
 func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Request) {
+	// _, claims, _ := jwtauth.FromContext(r.Context())
+	// slog.Info("Claims", "claims", claims)
 	query := r.URL.Query()
 	name := query.Get("name")
 	if name == "" {
