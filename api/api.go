@@ -12,6 +12,8 @@ import (
 
 	"log/slog"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/perebaj/contractus"
 )
 
@@ -92,4 +94,22 @@ func convert(content, email string) (t []contractus.Transaction, err error) {
 
 	}
 	return t, nil
+}
+
+// Router gather all the routes of the API.
+func Router(a Auth, storage transactionStorage) http.Handler {
+	r := chi.NewRouter()
+	r.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(a.JWTAuth()))
+		r.Use(jwtauth.Authenticator)
+
+		RegisterTransactionsHandler(r, storage)
+	})
+
+	r.Group(func(r chi.Router) {
+		// Public routes
+		RegisterAuthHandler(r, a)
+		RegisterSwaggerHandler(r)
+	})
+	return r
 }

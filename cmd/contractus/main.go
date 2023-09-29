@@ -10,8 +10,6 @@ import (
 
 	"log/slog"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/jwtauth/v5"
 	"github.com/perebaj/contractus/api"
 	"github.com/perebaj/contractus/postgres"
 	"golang.org/x/oauth2"
@@ -77,20 +75,7 @@ func main() {
 
 	cfg.Auth.GoogleOAuthConfig = &googleOAuthConfig
 
-	r := chi.NewRouter()
-	r.Group(func(r chi.Router) {
-		// Authenticated routes
-		r.Use(jwtauth.Verifier(cfg.Auth.JWTAuth()))
-		r.Use(jwtauth.Authenticator)
-
-		api.RegisterTransactionsHandler(r, storage)
-	})
-
-	r.Group(func(r chi.Router) {
-		// Public routes
-		api.RegisterAuthHandler(r, cfg.Auth)
-		api.RegisterSwaggerHandler(r)
-	})
+	r := api.Router(cfg.Auth, storage)
 
 	svc := &http.Server{
 		Addr:         ":" + cfg.PORT,
