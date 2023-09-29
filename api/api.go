@@ -34,7 +34,7 @@ func sendErr(w http.ResponseWriter, statusCode int, err error) {
 		}
 	}
 	if statusCode >= 500 {
-		slog.Error("Unable to process request", "error", err.Error(), "status_code", statusCode)
+		slog.Error("Unable to process request", "error", err, "status_code", statusCode)
 	}
 
 	send(w, statusCode, httpErr)

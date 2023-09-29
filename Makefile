@@ -135,7 +135,8 @@ dev/%:
 ## API IP
 .PHONY: ip
 ip:
-	@docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' contractus_contractus_1
+	$(eval IP := $(shell docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' contractus_contractus_1))
+	@echo "http://$(IP):8080"
 
 ## Display help for all targets
 .PHONY: help

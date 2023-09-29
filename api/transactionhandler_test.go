@@ -47,11 +47,15 @@ func TestTransactionHandlerUpload(t *testing.T) {
 	}
 	m := &mockTransactionStorage{}
 	r := chi.NewRouter()
-	RegisterHandler(r, m)
+
+	RegisterTransactionsHandler(r, m)
 
 	req := httptest.NewRequest(http.MethodPost, "/upload", &b)
 	req.Header.Set("Content-Type", w.FormDataContentType())
-
+	req.AddCookie(&http.Cookie{
+		Name:  "jwt",
+		Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBlcmViYWpAZ21haWwuY29tIn0.7uJvLACFC_2470iO_G8_xLaa1ChFgxQxHBvS9nzOMDM",
+	})
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
@@ -64,9 +68,15 @@ func TestTransactionHandlerUpload(t *testing.T) {
 func TestTransactionHandlerBalanceProducer(t *testing.T) {
 	m := &mockTransactionStorage{}
 	r := chi.NewRouter()
-	RegisterHandler(r, m)
+
+	RegisterTransactionsHandler(r, m)
 
 	req := httptest.NewRequest(http.MethodGet, "/balance/producer?name=JOSE%20CARLOS", nil)
+	req.AddCookie(&http.Cookie{
+		Name:  "jwt",
+		Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBlcmViYWpAZ21haWwuY29tIn0.7uJvLACFC_2470iO_G8_xLaa1ChFgxQxHBvS9nzOMDM",
+	})
+
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
@@ -79,9 +89,15 @@ func TestTransactionHandlerBalanceProducer(t *testing.T) {
 func TestTransactionHandlerBalanceAffiliate(t *testing.T) {
 	m := &mockTransactionStorage{}
 	r := chi.NewRouter()
-	RegisterHandler(r, m)
+
+	RegisterTransactionsHandler(r, m)
 
 	req := httptest.NewRequest(http.MethodGet, "/balance/affiliate?name=JOSE%20CARLOS", nil)
+	req.AddCookie(&http.Cookie{
+		Name:  "jwt",
+		Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBlcmViYWpAZ21haWwuY29tIn0.7uJvLACFC_2470iO_G8_xLaa1ChFgxQxHBvS9nzOMDM",
+	})
+
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
@@ -94,9 +110,15 @@ func TestTransactionHandlerBalanceAffiliate(t *testing.T) {
 func TestTransactionHandlerTransactions(t *testing.T) {
 	m := &mockTransactionStorage{}
 	r := chi.NewRouter()
-	RegisterHandler(r, m)
+
+	RegisterTransactionsHandler(r, m)
 
 	req := httptest.NewRequest(http.MethodGet, "/transactions", nil)
+	req.AddCookie(&http.Cookie{
+		Name:  "jwt",
+		Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBlcmViYWpAZ21haWwuY29tIn0.7uJvLACFC_2470iO_G8_xLaa1ChFgxQxHBvS9nzOMDM",
+	})
+
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)
@@ -106,12 +128,11 @@ func TestTransactionHandlerTransactions(t *testing.T) {
 	}
 }
 
-func TestSwagger(t *testing.T) {
-	m := &mockTransactionStorage{}
+func TestSwaggerHandler(t *testing.T) {
 	r := chi.NewRouter()
-	RegisterHandler(r, m)
+	RegisterSwaggerHandler(r)
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/docs", nil)
 	resp := httptest.NewRecorder()
 
 	r.ServeHTTP(resp, req)

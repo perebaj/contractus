@@ -12,14 +12,25 @@ Jamming around orders with API endpoints 🎸
 
 ## Environment Variables
 
+**Required** environment variables
+
+    CONTRACTUS_POSTGRES_URL
+    CONTRACTUS_GOOGLE_CLIENT_ID
+    CONTRACTUS_GOOGLE_CLIENT_SECRET
+    CONTRACTUS_GOOGLE_REDIRECT_URL
+    CONTRACTUS_JWT_SECRET_KEY
+
+## Get Started
+
 To start the service locally, you can type `make dev/start` and after that you can use the docker container IP to play around the routes, `make ip`
 
 Request example:
 
-    curl http://(make ip):8080
+    curl (make ip)
 
 ## Command line
-All commands are synthesized in the Makefile, to start the development environment, just run:
+
+All commands are synthesized in the Makefile `make help`, to start the development environment, just run:
 
     make dev/start
     make dev <- You will be able to run commands inside the container
@@ -41,8 +52,14 @@ The testcase variable could be used to run a specific test
     `make image/publish`
     `heroku container:release web -a contractus`
 
-## Logs in production
+## Logs
+
+Production
     `heroku logs --tail -a contractus`
+
+Local:
+    `make dev/logs contractus`
+
 
 ## API documentation
 [API Docs](api/docs/)

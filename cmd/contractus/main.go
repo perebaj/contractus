@@ -11,8 +11,11 @@ import (
 	"log/slog"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/perebaj/contractus/api"
 	"github.com/perebaj/contractus/postgres"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 // Config have the core configuration for the service.
@@ -21,6 +24,7 @@ type Config struct {
 	LogLevel string
 	LogType  string // json or text
 	Postgres postgres.Config
+	Auth     api.Auth
 }
 
 func main() {
@@ -34,11 +38,24 @@ func main() {
 		},
 		LogLevel: getEnvWithDefault("LOG_LEVEL", "INFO"),
 		LogType:  getEnvWithDefault("LOG_TYPE", "json"),
+		Auth: api.Auth{
+			ClientID:     os.Getenv("CONTRACTUS_GOOGLE_CLIENT_ID"),
+			ClientSecret: os.Getenv("CONTRACTUS_GOOGLE_CLIENT_SECRET"),
+			RedirectURL:  os.Getenv("CONTRACTUS_GOOGLE_REDIRECT_URL"),
+			Domain:       getEnvWithDefault("CONTRACTUS_DOMAIN", "http://localhost:8080"),
+			JWTSecretKey: os.Getenv("CONTRACTUS_JWT_SECRET_KEY"),
+			AccessType:   getEnvWithDefault("CONTRACTUS_ACCESS_TYPE", "online"),
+		},
 	}
 
 	err := setUpLog(cfg)
 	if err != nil {
 		slog.Error("Failed to set up logger", "error", err)
+		syscall.Exit(1)
+	}
+
+	if cfg.Auth.ClientID == "" || cfg.Auth.ClientSecret == "" || cfg.Auth.RedirectURL == "" {
+		slog.Error("missing Google OAuth2 configuration")
 		syscall.Exit(1)
 	}
 
@@ -49,9 +66,30 @@ func main() {
 	}
 	storage := postgres.NewStorage(db)
 
+	googleOAuthConfig := oauth2.Config{
+		ClientID:     cfg.Auth.ClientID,
+		ClientSecret: cfg.Auth.ClientSecret,
+		RedirectURL:  cfg.Auth.RedirectURL,
+		Endpoint:     google.Endpoint,
+		Scopes: []string{"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile"},
+	}
+
+	cfg.Auth.GoogleOAuthConfig = &googleOAuthConfig
+
 	r := chi.NewRouter()
 	r.Group(func(r chi.Router) {
-		api.RegisterHandler(r, storage)
+		// Authenticated routes
+		r.Use(jwtauth.Verifier(cfg.Auth.JWTAuth()))
+		r.Use(jwtauth.Authenticator)
+
+		api.RegisterTransactionsHandler(r, storage)
+	})
+
+	r.Group(func(r chi.Router) {
+		// Public routes
+		api.RegisterAuthHandler(r, cfg.Auth)
+		api.RegisterSwaggerHandler(r)
 	})
 
 	svc := &http.Server{
