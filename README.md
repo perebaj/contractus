@@ -12,13 +12,15 @@ Jamming around orders with API endpoints 🎸
 
 ## Environment Variables
 
-**Required** environment variables
+If you want to run this project locally you must set up these environment variables:
 
     CONTRACTUS_POSTGRES_URL
     CONTRACTUS_GOOGLE_CLIENT_ID
     CONTRACTUS_GOOGLE_CLIENT_SECRET
     CONTRACTUS_DOMAIN
     CONTRACTUS_JWT_SECRET_KEY
+
+This could be made in the [docker-compose.yml](./docker-compose.yaml)
 
 ## Get Started
 
@@ -64,7 +66,13 @@ Local:
 ## API documentation
 [API Docs](api/docs/)
 
-## Attention points 
- - For a while, the integration-tests just ran locally not in CI, this increased the time to ship code 🚀
- - We don't have a way to paginate transactions. 😔
- - To publish images and new releases, for now, the only way is using the command line, isn't automate by CI yet 😔
+## It's also good to know 
+- You can log in to the service using your Google account. No bureaucracy to 🎸
+- Structured logs all the way 🥸
+- Deployed to the open sea through Heroku 🌊 (Check the repository details to access the link)
+---
+- For a while, the integration-tests just ran locally  not in CI 😔, this increased the time to 🚀 code;
+- We don't have a way to paginate transactions yet; 😔
+- To publish images and new releases, for now, the only way is using the command line, isn't automate by CI yet; 😔
+- The infra isn't automated by the power of the IAC yet.😔 Button engineer only. 🔘✅
+

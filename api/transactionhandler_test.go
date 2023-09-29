@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/perebaj/contractus"
 )
 
@@ -19,11 +20,11 @@ func (m *mockTransactionStorage) SaveTransaction(_ context.Context, _ []contract
 	return nil
 }
 
-func (m *mockTransactionStorage) Balance(_ context.Context, _ string, _ string) (*contractus.BalanceResponse, error) {
+func (m *mockTransactionStorage) Balance(_ context.Context, _ string, _ string, _ string) (*contractus.BalanceResponse, error) {
 	return nil, nil
 }
 
-func (m *mockTransactionStorage) Transactions(_ context.Context) (contractus.TransactionResponse, error) {
+func (m *mockTransactionStorage) Transactions(_ context.Context, _ string) (contractus.TransactionResponse, error) {
 	return contractus.TransactionResponse{}, nil
 }
 
@@ -48,13 +49,20 @@ func TestTransactionHandlerUpload(t *testing.T) {
 	m := &mockTransactionStorage{}
 	r := chi.NewRouter()
 
-	RegisterTransactionsHandler(r, m)
+	tokenAuth := jwtauth.New("HS256", []byte("secret"), nil)
+	_, token, _ := tokenAuth.Encode(map[string]interface{}{"email": "jj@example.com"})
+
+	r.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(tokenAuth))
+		r.Use(jwtauth.Authenticator)
+		RegisterTransactionsHandler(r, m)
+	})
 
 	req := httptest.NewRequest(http.MethodPost, "/upload", &b)
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	req.AddCookie(&http.Cookie{
 		Name:  "jwt",
-		Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBlcmViYWpAZ21haWwuY29tIn0.7uJvLACFC_2470iO_G8_xLaa1ChFgxQxHBvS9nzOMDM",
+		Value: token,
 	})
 	resp := httptest.NewRecorder()
 
@@ -66,15 +74,21 @@ func TestTransactionHandlerUpload(t *testing.T) {
 }
 
 func TestTransactionHandlerBalanceProducer(t *testing.T) {
+	tokenAuth := jwtauth.New("HS256", []byte("secret"), nil)
+	_, token, _ := tokenAuth.Encode(map[string]interface{}{"email": "jj@example.com"})
+
 	m := &mockTransactionStorage{}
 	r := chi.NewRouter()
-
-	RegisterTransactionsHandler(r, m)
+	r.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(tokenAuth))
+		r.Use(jwtauth.Authenticator)
+		RegisterTransactionsHandler(r, m)
+	})
 
 	req := httptest.NewRequest(http.MethodGet, "/balance/producer?name=JOSE%20CARLOS", nil)
 	req.AddCookie(&http.Cookie{
 		Name:  "jwt",
-		Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBlcmViYWpAZ21haWwuY29tIn0.7uJvLACFC_2470iO_G8_xLaa1ChFgxQxHBvS9nzOMDM",
+		Value: token,
 	})
 
 	resp := httptest.NewRecorder()
@@ -82,20 +96,26 @@ func TestTransactionHandlerBalanceProducer(t *testing.T) {
 	r.ServeHTTP(resp, req)
 
 	if resp.Code != http.StatusOK {
-		t.Fatalf("expected status code %d, got %d", http.StatusOK, resp.Code)
+		t.Fatalf("expected status code %d, got %d, Response Body %s", http.StatusOK, resp.Code, resp.Body.String())
 	}
 }
 
 func TestTransactionHandlerBalanceAffiliate(t *testing.T) {
 	m := &mockTransactionStorage{}
 	r := chi.NewRouter()
+	tokenAuth := jwtauth.New("HS256", []byte("secret"), nil)
+	_, token, _ := tokenAuth.Encode(map[string]interface{}{"email": "jj@example.com"})
 
-	RegisterTransactionsHandler(r, m)
+	r.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(tokenAuth))
+		r.Use(jwtauth.Authenticator)
+		RegisterTransactionsHandler(r, m)
+	})
 
 	req := httptest.NewRequest(http.MethodGet, "/balance/affiliate?name=JOSE%20CARLOS", nil)
 	req.AddCookie(&http.Cookie{
 		Name:  "jwt",
-		Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBlcmViYWpAZ21haWwuY29tIn0.7uJvLACFC_2470iO_G8_xLaa1ChFgxQxHBvS9nzOMDM",
+		Value: token,
 	})
 
 	resp := httptest.NewRecorder()
@@ -110,13 +130,19 @@ func TestTransactionHandlerBalanceAffiliate(t *testing.T) {
 func TestTransactionHandlerTransactions(t *testing.T) {
 	m := &mockTransactionStorage{}
 	r := chi.NewRouter()
+	tokenAuth := jwtauth.New("HS256", []byte("secret"), nil)
+	_, token, _ := tokenAuth.Encode(map[string]interface{}{"email": "jj@example.com"})
 
-	RegisterTransactionsHandler(r, m)
+	r.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(tokenAuth))
+		r.Use(jwtauth.Authenticator)
+		RegisterTransactionsHandler(r, m)
+	})
 
 	req := httptest.NewRequest(http.MethodGet, "/transactions", nil)
 	req.AddCookie(&http.Cookie{
 		Name:  "jwt",
-		Value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBlcmViYWpAZ21haWwuY29tIn0.7uJvLACFC_2470iO_G8_xLaa1ChFgxQxHBvS9nzOMDM",
+		Value: token,
 	})
 
 	resp := httptest.NewRecorder()

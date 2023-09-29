@@ -12,6 +12,7 @@ import (
 	"log/slog"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/perebaj/contractus"
 	"github.com/perebaj/contractus/postgres"
@@ -19,8 +20,8 @@ import (
 
 type transactionStorage interface {
 	SaveTransaction(ctx context.Context, t []contractus.Transaction) error
-	Balance(ctx context.Context, sellerType, sellerName string) (*contractus.BalanceResponse, error)
-	Transactions(ctx context.Context) (contractus.TransactionResponse, error)
+	Balance(ctx context.Context, sellerType, sellerName, email string) (*contractus.BalanceResponse, error)
+	Transactions(ctx context.Context, email string) (contractus.TransactionResponse, error)
 }
 
 type transactionHandler struct {
@@ -62,8 +63,12 @@ func RegisterSwaggerHandler(r chi.Router) {
 }
 
 func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Request) {
-	// _, claims, _ := jwtauth.FromContext(r.Context())
-	// slog.Info("Claims", "claims", claims)
+	email, err := emailFromToken(r)
+	if err != nil {
+		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
+		return
+	}
+
 	query := r.URL.Query()
 	name := query.Get("name")
 	if name == "" {
@@ -71,7 +76,7 @@ func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	b, err := s.storage.Balance(r.Context(), "producer", name)
+	b, err := s.storage.Balance(r.Context(), "producer", name, email)
 	if err != nil {
 		if err == postgres.ErrSellerNotFound {
 			sendErr(w, http.StatusNotFound, Error{"seller_not_found", "seller not found"})
@@ -85,6 +90,11 @@ func (s transactionHandler) producerBalance(w http.ResponseWriter, r *http.Reque
 }
 
 func (s transactionHandler) affiliateBalance(w http.ResponseWriter, r *http.Request) {
+	email, err := emailFromToken(r)
+	if err != nil {
+		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
+		return
+	}
 	query := r.URL.Query()
 	name := query.Get("name")
 	if name == "" {
@@ -92,7 +102,7 @@ func (s transactionHandler) affiliateBalance(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	b, err := s.storage.Balance(r.Context(), "affiliate", name)
+	b, err := s.storage.Balance(r.Context(), "affiliate", name, email)
 	if err != nil {
 		if err == postgres.ErrSellerNotFound {
 			sendErr(w, http.StatusNotFound, Error{"seller_not_found", "seller not found"})
@@ -106,6 +116,12 @@ func (s transactionHandler) affiliateBalance(w http.ResponseWriter, r *http.Requ
 }
 
 func (s transactionHandler) upload(w http.ResponseWriter, r *http.Request) {
+	email, err := emailFromToken(r)
+	if err != nil {
+		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
+		return
+	}
+
 	content, err := parseFile(r)
 	if err != nil {
 		slog.Error("Failed to parse file", "error", err)
@@ -113,7 +129,7 @@ func (s transactionHandler) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transactions, err := convert(content)
+	transactions, err := convert(content, email)
 	if err != nil {
 		slog.Error("Failed to convert transactions", "error", err, "content", content)
 		sendErr(w, http.StatusBadRequest, Error{"invalid_file", "invalid file"})
@@ -130,7 +146,13 @@ func (s transactionHandler) upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s transactionHandler) transactions(w http.ResponseWriter, r *http.Request) {
-	tResponse, err := s.storage.Transactions(r.Context())
+	_, claims, _ := jwtauth.FromContext(r.Context())
+	if claims["email"] == nil {
+		sendErr(w, http.StatusBadRequest, Error{"email_required", "email is required"})
+		return
+	}
+	email := claims["email"].(string)
+	tResponse, err := s.storage.Transactions(r.Context(), email)
 	if err != nil {
 		sendErr(w, http.StatusInternalServerError, err)
 		return
@@ -150,7 +172,7 @@ type Transaction struct {
 
 // Convert transform the raw transaction to the business Transaction structure.
 // TODO(JOJO) Join errors in one, and return all the errors.
-func (t *Transaction) Convert() (*contractus.Transaction, error) {
+func (t *Transaction) Convert(email string) (*contractus.Transaction, error) {
 	typeInt, err := strconv.Atoi(t.Type)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert type: %v", err)
@@ -171,6 +193,7 @@ func (t *Transaction) Convert() (*contractus.Transaction, error) {
 	sellerName := strings.Replace(t.SellerName, "\n", "", -1)
 
 	transac := &contractus.Transaction{
+		Email:              email,
 		Type:               typeInt,
 		Date:               dateTime.UTC(),
 		ProductDescription: prodDesc,
@@ -192,4 +215,12 @@ func (t *Transaction) Convert() (*contractus.Transaction, error) {
 	transac.Action = transacAction
 
 	return transac, nil
+}
+
+func emailFromToken(r *http.Request) (string, error) {
+	_, claims, err := jwtauth.FromContext(r.Context())
+	if err != nil {
+		return "", fmt.Errorf("failed to get claims from context: %v", err)
+	}
+	return claims["email"].(string), nil
 }
