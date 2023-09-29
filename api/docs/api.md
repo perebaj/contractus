@@ -18,6 +18,14 @@ Request:
         -F 'file=@sales.txt;type=text/plain'
 ```
 
+Response:
+
+```JSON
+{
+  "msg": "file uploaded successfully"
+}
+```
+
 ## `/balance/affiliate?name=<>`
 
 This route is responsible to retrieve the balance for a given affiliate name

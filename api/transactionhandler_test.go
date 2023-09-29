@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -64,6 +65,15 @@ func TestTransactionHandlerUpload(t *testing.T) {
 	if resp.Code != http.StatusOK {
 		t.Fatalf("expected status code %d, got %d", http.StatusOK, resp.Code)
 	}
+
+	var response struct {
+		Msg string `json:"msg"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		t.Fatalf("failed to decode response body: %v", err)
+	}
+	assert(t, response.Msg, "file uploaded successfully")
+
 }
 
 func TestTransactionHandlerUpload_Unauthorized(t *testing.T) {
