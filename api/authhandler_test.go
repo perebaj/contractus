@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -68,4 +69,49 @@ func TestLogin(t *testing.T) {
 	r.ServeHTTP(resp, req)
 
 	assert(t, resp.Code, http.StatusFound)
+}
+
+type mockOAuthConfig struct{}
+
+func (m *mockOAuthConfig) AuthCodeURL(_ string, _ ...oauth2.AuthCodeOption) string {
+	return ""
+}
+
+func (m *mockOAuthConfig) Client(_ context.Context, _ *oauth2.Token) *http.Client {
+	return &http.Client{}
+}
+
+func (m *mockOAuthConfig) Exchange(_ context.Context, _ string, _ ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return &oauth2.Token{}, nil
+}
+
+func TestCallback(t *testing.T) {
+	auth := Auth{
+		GoogleOAuthConfig: &mockOAuthConfig{},
+		Domain:            "example.com",
+	}
+	r := chi.NewRouter()
+	RegisterAuthHandler(r, auth)
+
+	req := httptest.NewRequest(http.MethodGet, "/callback?state="+randState+"&code=mock-code", nil)
+	resp := httptest.NewRecorder()
+	r.ServeHTTP(resp, req)
+
+	assert(t, resp.Code, http.StatusSeeOther)
+
+	cookies := resp.Result().Cookies()
+	assert(t, len(cookies), 1)
+	assert(t, cookies[0].Name, "jwt")
+}
+
+func TestCallback_InvalidParam(t *testing.T) {
+	r := chi.NewRouter()
+	RegisterAuthHandler(r, Auth{})
+
+	req := httptest.NewRequest(http.MethodGet, "/callback", nil)
+
+	resp := httptest.NewRecorder()
+	r.ServeHTTP(resp, req)
+
+	assert(t, resp.Code, http.StatusBadRequest)
 }

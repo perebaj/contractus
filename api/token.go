@@ -1,10 +1,20 @@
 package api
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/oauth2"
 )
+
+// OAuth2Interface is an interface for the oauth2.Config struct to be able to mock it and test the callback behaviour.
+type OAuth2Interface interface {
+	Exchange(ctx context.Context, code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error)
+	Client(ctx context.Context, t *oauth2.Token) *http.Client
+	AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string
+}
 
 // Auth have the configuration for Auth endpoints.
 type Auth struct {
@@ -18,7 +28,7 @@ type Auth struct {
 	// JWT secret key
 	JWTSecretKey string
 	// Google OAuth2 config struct
-	GoogleOAuthConfig *oauth2.Config
+	GoogleOAuthConfig OAuth2Interface
 	// Access type
 	AccessType string // offline(for local) or online(for production)
 }

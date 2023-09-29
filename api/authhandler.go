@@ -3,7 +3,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"log/slog"
@@ -12,8 +11,6 @@ import (
 	"github.com/perebaj/contractus"
 	"golang.org/x/oauth2"
 )
-
-// Auth endpoints
 
 // TODO(JOJO): randomize this
 var randState = "random"
@@ -48,18 +45,15 @@ func login(w http.ResponseWriter, r *http.Request, a Auth) {
 
 func callback(w http.ResponseWriter, r *http.Request, a Auth) {
 	state := r.FormValue("state")
-	if state == "" {
-		sendErr(w, http.StatusBadRequest, errors.New("missing state"))
-		return
-	}
-	if state != randState {
-		sendErr(w, http.StatusBadRequest, errors.New("invalid state"))
+
+	if state == "" || state != randState {
+		sendErr(w, http.StatusBadRequest, Error{"invalid_state", "invalid state query parameter"})
 		return
 	}
 
 	code := r.FormValue("code")
 	if code == "" {
-		sendErr(w, http.StatusBadRequest, errors.New("missing code"))
+		sendErr(w, http.StatusBadRequest, Error{"invalid_code", "invalid code query parameter"})
 		return
 	}
 
