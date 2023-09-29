@@ -34,13 +34,14 @@ func TestConvert(t *testing.T) {
 	content := `12022-01-15T19:20:30-03:00CURSO DE BEM-ESTAR            0000012750JOSE CARLOS
 	12021-12-03T11:46:02-03:00DOMINANDO INVESTIMENTOS       0000050000MARIA CANDIDA
 	`
-	transac, err := convert(content)
+	transac, err := convert(content, "jj@example.com")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	want := []contractus.Transaction{
 		{
+			Email:              "jj@example.com",
 			Type:               1,
 			Date:               time.Date(2022, 01, 15, 22, 20, 30, 0, time.UTC),
 			ProductDescription: "CURSO DE BEM-ESTAR",
@@ -50,6 +51,7 @@ func TestConvert(t *testing.T) {
 			Action:             "venda produtor",
 		},
 		{
+			Email:              "jj@example.com",
 			Type:               1,
 			Date:               time.Date(2021, 12, 03, 14, 46, 02, 0, time.UTC),
 			ProductDescription: "DOMINANDO INVESTIMENTOS",
@@ -61,6 +63,7 @@ func TestConvert(t *testing.T) {
 	}
 
 	if len(transac) == len(want) {
+		assert(t, transac[0].Email, want[0].Email)
 		assert(t, transac[0].Type, want[0].Type)
 		assert(t, transac[0].Date.Format(time.RFC3339), want[0].Date.Format(time.RFC3339))
 		assert(t, transac[0].ProductDescription, want[0].ProductDescription)
@@ -69,6 +72,7 @@ func TestConvert(t *testing.T) {
 		assert(t, transac[0].SellerType, want[0].SellerType)
 		assert(t, transac[0].Action, want[0].Action)
 
+		assert(t, transac[1].Email, want[1].Email)
 		assert(t, transac[1].Type, want[1].Type)
 		assert(t, transac[1].Date.Format(time.RFC3339), want[1].Date.Format(time.RFC3339))
 		assert(t, transac[1].ProductDescription, want[1].ProductDescription)

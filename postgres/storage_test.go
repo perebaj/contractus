@@ -81,6 +81,7 @@ func TestStorageSaveTransaction(t *testing.T) {
 	ctx := context.Background()
 	want := []contractus.Transaction{
 		{
+			Email:              "jj@example.com",
 			Type:               1,
 			Date:               time.Now().UTC(),
 			ProductDescription: "Product description",
@@ -90,7 +91,6 @@ func TestStorageSaveTransaction(t *testing.T) {
 			Action:             "venda produtor",
 		},
 	}
-
 	err := storage.SaveTransaction(ctx, want)
 	if err != nil {
 		t.Fatalf("error saving transaction: %v", err)
@@ -102,6 +102,7 @@ func TestStorageSaveTransaction(t *testing.T) {
 		t.Fatalf("error getting transaction: %v", err)
 	}
 
+	assert(t, got.Email, want[0].Email)
 	assert(t, got.Type, want[0].Type)
 	assert(t, got.Date.Format(time.RFC3339), want[0].Date.Format(time.RFC3339))
 	assert(t, got.ProductDescription, want[0].ProductDescription)
@@ -117,6 +118,7 @@ func TestStorageTransactions(t *testing.T) {
 
 	want := []contractus.Transaction{
 		{
+			Email:              "jj@example.com",
 			Type:               1,
 			Date:               time.Now().UTC(),
 			ProductDescription: "Product description",
@@ -126,6 +128,7 @@ func TestStorageTransactions(t *testing.T) {
 			Action:             "venda produtor",
 		},
 		{
+			Email:              "jj@example.com",
 			Type:               2,
 			Date:               time.Now().UTC(),
 			ProductDescription: "Product description 2",
@@ -141,7 +144,7 @@ func TestStorageTransactions(t *testing.T) {
 		t.Fatalf("error saving transaction 1: %v", err)
 	}
 
-	got, err := storage.Transactions(ctx)
+	got, err := storage.Transactions(ctx, "jj@example.com")
 	if err != nil {
 		t.Fatalf("error getting transactions: %v", err)
 	}
@@ -151,6 +154,7 @@ func TestStorageTransactions(t *testing.T) {
 	// the order based on the insertion order.
 	// Reference: https://dba.stackexchange.com/questions/95822/does-postgres-preserve-insertion-order-of-records
 	if got.Total == 2 {
+		assert(t, got.Transactions[0].Email, want[0].Email)
 		assert(t, got.Transactions[0].Type, want[0].Type)
 		assert(t, got.Transactions[0].Date.Format(time.RFC3339), want[0].Date.Format(time.RFC3339))
 		assert(t, got.Transactions[0].ProductDescription, want[0].ProductDescription)
@@ -159,6 +163,7 @@ func TestStorageTransactions(t *testing.T) {
 		assert(t, got.Transactions[0].SellerType, want[0].SellerType)
 		assert(t, got.Transactions[0].Action, want[0].Action)
 
+		assert(t, got.Transactions[1].Email, want[1].Email)
 		assert(t, got.Transactions[1].Type, want[1].Type)
 		assert(t, got.Transactions[1].Date.Format(time.RFC3339), want[1].Date.Format(time.RFC3339))
 		assert(t, got.Transactions[1].ProductDescription, want[1].ProductDescription)
@@ -167,7 +172,7 @@ func TestStorageTransactions(t *testing.T) {
 		assert(t, got.Transactions[1].SellerType, want[1].SellerType)
 		assert(t, got.Transactions[1].Action, want[1].Action)
 	} else {
-		t.Fatal("error getting transactions: expected 2 transactions")
+		t.Fatalf("error getting transactions: expected 2 transactions, got %d", got.Total)
 	}
 }
 
@@ -178,6 +183,7 @@ func TestStorageBalance(t *testing.T) {
 
 	transactions1 := []contractus.Transaction{
 		{
+			Email:              "jj@example.com",
 			Type:               1,
 			Date:               time.Now().UTC(),
 			ProductDescription: "Product description",
@@ -187,6 +193,7 @@ func TestStorageBalance(t *testing.T) {
 			Action:             "venda produtor",
 		},
 		{
+			Email:              "jj@example.com",
 			Type:               3,
 			Date:               time.Now().UTC(),
 			ProductDescription: "Product description 2",
@@ -196,6 +203,7 @@ func TestStorageBalance(t *testing.T) {
 			Action:             "comissao paga",
 		},
 		{
+			Email:              "jj@example.com",
 			Type:               1,
 			Date:               time.Now().UTC(),
 			ProductDescription: "Product description 3",
@@ -211,7 +219,7 @@ func TestStorageBalance(t *testing.T) {
 		t.Fatalf("error saving transactions 1: %v", err)
 	}
 
-	got, err := storage.Balance(ctx, "producer", "JOSE CARLOS")
+	got, err := storage.Balance(ctx, "producer", "JOSE CARLOS", "jj@example.com")
 	if err != nil {
 		t.Fatalf("error getting balance: %v", err)
 	}
@@ -221,6 +229,7 @@ func TestStorageBalance(t *testing.T) {
 
 	transactions2 := []contractus.Transaction{
 		{
+			Email:              "jj@example.com",
 			Type:               2,
 			Date:               time.Now().UTC(),
 			ProductDescription: "Product description",
@@ -230,6 +239,7 @@ func TestStorageBalance(t *testing.T) {
 			Action:             "venda afiliado",
 		},
 		{
+			Email:              "jj@example.com",
 			Type:               4,
 			Date:               time.Now().UTC(),
 			ProductDescription: "Product description 2",
@@ -245,7 +255,7 @@ func TestStorageBalance(t *testing.T) {
 		t.Fatalf("error saving transactions 2: %v", err)
 	}
 
-	got, err = storage.Balance(ctx, "affiliate", "CARLOS BATISTA")
+	got, err = storage.Balance(ctx, "affiliate", "CARLOS BATISTA", "jj@example.com")
 	if err != nil {
 		t.Fatalf("error getting balance: %v", err)
 	}
@@ -261,6 +271,7 @@ func TestStorageBalance_NotFound(t *testing.T) {
 
 	transactions1 := []contractus.Transaction{
 		{
+			Email:              "jj@gmail.com",
 			Type:               1,
 			Date:               time.Now().UTC(),
 			ProductDescription: "Product description",
@@ -276,7 +287,7 @@ func TestStorageBalance_NotFound(t *testing.T) {
 		t.Fatalf("error saving transactions 1: %v", err)
 	}
 
-	got, err := storage.Balance(ctx, "producer", "INVALID NAME")
+	got, err := storage.Balance(ctx, "producer", "INVALID NAME", "jj@example.com")
 	if !errors.Is(err, postgres.ErrSellerNotFound) {
 		t.Fatalf("error getting balance: %v", err)
 	}

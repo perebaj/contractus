@@ -73,7 +73,7 @@ func parseFile(r *http.Request) (content string, err error) {
 }
 
 // convert is an internal function responsible for converting the file content into transactions.
-func convert(content string) (t []contractus.Transaction, err error) {
+func convert(content, email string) (t []contractus.Transaction, err error) {
 	content = strings.Replace(content, "\t", "", -1)
 	var re = regexp.MustCompile(`(?m).*$\n`)
 	for _, match := range re.FindAllString(content, -1) {
@@ -84,7 +84,7 @@ func convert(content string) (t []contractus.Transaction, err error) {
 			ProductPriceCents:  match[56:66],
 			SellerName:         match[66:],
 		}
-		transac, err := rawTransaction.Convert()
+		transac, err := rawTransaction.Convert(email)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert transaction: %v", err)
 		}

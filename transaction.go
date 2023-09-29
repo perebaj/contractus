@@ -20,6 +20,7 @@ type BalanceResponse struct {
 
 // Transaction have the fields that represent a single transaction.
 type Transaction struct {
+	Email              string    `json:"email" db:"email"`
 	Type               int       `json:"type" db:"type"`
 	Date               time.Time `json:"date" db:"date"`
 	ProductDescription string    `json:"product_description" db:"product_description"`
