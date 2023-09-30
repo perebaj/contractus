@@ -142,7 +142,9 @@ func (s transactionHandler) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	send(w, http.StatusOK, nil)
+	send(w, http.StatusOK, struct {
+		Msg string `json:"msg"`
+	}{"file uploaded successfully"})
 }
 
 func (s transactionHandler) transactions(w http.ResponseWriter, r *http.Request) {

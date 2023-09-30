@@ -15,7 +15,16 @@ Request:
         'http://<>:8080/upload' \
         -H 'accept: application/json' \
         -H 'Content-Type: multipart/form-data' \
-        -F 'file=@sales.txt;type=text/plain'
+        -H 'Cookie: jwt=<>' \
+        -F 'file=@sales.txt;type=text/plain' 
+```
+
+Response:
+
+```JSON
+{
+  "msg": "file uploaded successfully"
+}
 ```
 
 ## `/balance/affiliate?name=<>`
@@ -34,7 +43,8 @@ Request:
 ```bash
 curl -i -X 'GET' \
   'http://<>:8080/balance/affiliate?name=<>' \
-  -H 'accept: application/json'
+  -H 'accept: application/json' \
+  -H 'Cookie: jwt=<>'
 ```
 
 Response:
@@ -62,7 +72,8 @@ Request:
 ```bash
 curl -i -X 'GET' \
   'http://<>:8080/balance/producer?name=<>' \
-  -H 'accept: application/json'
+  -H 'accept: application/json' \
+  -H 'Cookie: jwt=<>'
 ```
 
 Response:
@@ -83,7 +94,8 @@ Request:
 ```bash
 curl -i -X 'GET' \
   'http://<>:8080/transactions' \
-  -H 'accept: application/json'
+  -H 'accept: application/json' \
+  -H 'Cookie: jwt=<>'
 ```
 
 Response:
