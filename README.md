@@ -14,13 +14,10 @@ Jamming around orders with API endpoints 🎸
 
 If you want to run this project locally you must set up these environment variables:
 
-    CONTRACTUS_POSTGRES_URL
     CONTRACTUS_GOOGLE_CLIENT_ID
     CONTRACTUS_GOOGLE_CLIENT_SECRET
-    CONTRACTUS_DOMAIN
-    CONTRACTUS_JWT_SECRET_KEY
 
-This could be made in the [docker-compose.yml](./docker-compose.yaml)
+This can be done in your terminal, where you export the variables, and then in the same terminal, run the service startup command `make dev/start`
 
 **Note:** To create your own Google Client for OAuth2.0, access the following [link](https://console.cloud.google.com/apis/credentials), without these secrets, the service won't run locally, but it's possible to access it using the link present in the repository details on GitHub
 
