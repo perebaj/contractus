@@ -22,6 +22,8 @@ If you want to run this project locally you must set up these environment variab
 
 This could be made in the [docker-compose.yml](./docker-compose.yaml)
 
+**Note:** To create your own Google Client for OAuth2.0, access the following [link](https://console.cloud.google.com/apis/credentials), without these secrets, the service won't run locally, but it's possible to access it using the link present in the repository details on GitHub
+
 ## Get Started
 
 To start the service locally, you can type `make dev/start` and after that you can use the docker container IP to play around the routes, `make ip`
@@ -29,6 +31,8 @@ To start the service locally, you can type `make dev/start` and after that you c
 Request example:
 
     curl (make ip)
+
+Or just accessing `http:/localhost:8080`
 
 ## Command line
 
